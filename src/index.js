@@ -9,7 +9,19 @@ const app = express();
 
 dotenv.config({ path: "./.env" });                 // dotenv is a package to read the .env file and set the environment variables
 
-dbConn();
+dbConn()
+.then(() => {
+
+    app.on("close", (error) => {
+        console.log("Server closed")
+        throw error
+    })
+
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(` Server started on port ${process.env.PORT}`);
+    })
+})
+.catch((err) => {"Mongodb connection failed", err})
 
 
 
