@@ -48,7 +48,7 @@ const userSchema = new Schema(
             type: String,
             required: [true, "Password is required"]
         },
-        referenceid:
+        refreshToken:
         {
             type: String
         }
@@ -70,7 +70,7 @@ userSchema.methods.isPasswordCorrect =  async function(password)
     return await bcrypt.compare(password, this.password)
 }
 
-userSchema.models.generateAccessToken = function()
+userSchema.methods.generateAccessToken = function()
 {
     return jwt.sign
     (
@@ -84,10 +84,10 @@ userSchema.models.generateAccessToken = function()
         {
             expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         },
-    )
-}
+    );
+};
 
-userSchema.models.generateRefreshToken = function()
+userSchema.methods.generateRefreshToken = function()
 {
     return jwt.sign
     (
@@ -102,4 +102,6 @@ userSchema.models.generateRefreshToken = function()
 }
 
 
-export default User = mongoose.model("User",userSchema)
+const User = mongoose.model("User",userSchema)
+
+export default User
