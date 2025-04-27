@@ -155,7 +155,7 @@ const loginUser = asyncHandler(async (req,res) => {
 const logoutUser = asyncHandler(async(req, res) => {
     User.findByIdAndUpdate(
         req.user._id,
-        {$set: {refreshToken: undefined}},
+        {$unset: {refreshToken: 1}},
         {new: true}
     );
 
@@ -219,7 +219,7 @@ const refreshAccessToken = asyncHandler(async(req, res) => {
 })
 
 const changeCurrentPassword = asyncHandler( async(req, res) => {
-    const {oldPassword, newPassword} = req.body()
+    const {oldPassword, newPassword} = req.body
 
     const user = await User.findById(req.user?._id);
 
@@ -268,7 +268,7 @@ const updateAccountDetails = asyncHandler(async(req, res) => {
 const getCurrentUser = asyncHandler( async (req, res) => {
     return res
     .status(200)
-    .json(200, req.user, "Current user fetched successfully")
+    .json(new apiResponse(200, req.user, "User fetched successfully"))
 })
 
 const updateUserAvatar = asyncHandler(async(req, res) => {
@@ -339,13 +339,13 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
 })
 
 const getUserChannelProfile = asyncHandler(async(req, res) => {
-    const {username} = req.params;
+    const {username} = req.query;
 
     if(!username?.trim()){
         throw new apiError(400, "Username is missing")
     }
 
-    const channel = User.aggregate([
+    const channel = await User.aggregate([
 
         {$match: {
             username: username?.toLowerCase()
@@ -432,7 +432,7 @@ const getWatchHistory = asyncHandler(async(req, res) => {
                     },
                     {
                         $addFields: {
-                            $first: "$owner"
+                            owner: { $first: "$owner" }
                         }
                     }
                 ]
