@@ -3,7 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
 import { extractPublicIdFromUrl, uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   const {
