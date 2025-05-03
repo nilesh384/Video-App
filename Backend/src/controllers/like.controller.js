@@ -1,4 +1,4 @@
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose from "mongoose";
 import Like from "../models/like.model.js";
 import Video from "../models/video.model.js";
 import Comment from "../models/comment.model.js";
