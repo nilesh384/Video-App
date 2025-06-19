@@ -130,7 +130,8 @@ const loginUser = asyncHandler(async (req,res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: false,
+        sameSite: "None",
     }
 
     return res.status(200).
@@ -153,10 +154,10 @@ const logoutUser = asyncHandler(async(req, res) => {
         {$unset: {refreshToken: 1}},
         {new: true}
     );
-
+//TODO:  do secure to true
     const options = {
         httpOnly: true,
-        secure: true
+        secure: false
     }
 
     res.status(200).

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FiUser, FiLogOut, FiBell } from "react-icons/fi";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -7,30 +8,53 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    // Check if storedUser is not null and is a valid JSON string
-    if (storedUser) {
+    const fetchUser = async () => {
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        const token = localStorage.getItem("token");
+        const response = await fetch(
+          "http://localhost:8000/api/v1/users/current-user",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // important!
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (response.ok && data?.data) {
+          setUser(data.data);
+        } else {
+          console.error("Failed to fetch user:", data.message);
+        }
       } catch (error) {
-        console.error("Error parsing user data:", error);
+        console.error("Error fetching user:", error);
       }
-    }
+    };
+
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/users/logout", {
-        method: "POST",
-        credentials: "include", // This ensures cookies are sent with the request
-      });
+      const response = await fetch(
+        "http://localhost:8000/api/v1/users/logout",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // required
+          },
+          // credentials: "include", // this allows cookies like refreshToken/accessToken to be sent
+        }
+      );
 
       if (response.ok) {
-        const data = await response.json();  // Parse the JSON response here
-        console.log("Logout response:", data);  // Check the response content
+        const data = await response.json();
+        console.log("Logout successful:", data.message);
         setUser(null);
+        localStorage.removeItem("token");
+        
         navigate("/login");
       } else {
         console.error("Logout failed with status:", response.status);
@@ -43,22 +67,55 @@ const Navbar = () => {
   return (
     <header className="w-full sticky top-0 z-50 bg-gradient-to-r from-[#080716] via-[#120f37] to-[#11111d] text-white shadow-md">
       <nav className="flex justify-between items-center px-6 py-4 md:px-10">
-        <div className="text-2xl font-bold">Portfolio</div>
+        <Link to="/" className="text-2xl font-bold">
+          My Tube
+        </Link>
 
         <div className="hidden md:flex space-x-8 text-lg font-medium">
-          <Link to="/" className="hover:text-purple-400 transition duration-200">Home</Link>
-
           {!user ? (
             <>
-              <Link to="/signup" className="hover:text-purple-400 transition duration-200">Sign Up</Link>
-              <Link to="/login" className="hover:text-purple-400 transition duration-200">Login</Link>
+              {/* <Link to="/signup" ...>Sign Up</Link> -- REMOVE THIS */}
+
+              <Link
+                to="/signup"
+                className="hover:text-purple-400 transition duration-200"
+              >
+                Sign Up
+              </Link>
+
+              <Link
+                to="/login"
+                className="hover:text-purple-400 transition duration-200"
+              >
+                Login
+              </Link>
             </>
           ) : (
-            <div className="relative group">
-              <button className="hover:text-purple-400">{user.username}</button>
-              <div className="absolute top-full right-0 bg-gray-800 shadow-md rounded px-4 py-2 hidden group-hover:block">
-                <Link to="/profile" className="block hover:text-purple-300">Profile</Link>
-                <button onClick={handleLogout} className="block mt-2 text-left w-full hover:text-red-400">Logout</button>
+            <div className="flex items-center">
+              <FiBell className="text-2xl cursor-pointer mr-10 hover:text-yellow-300 " />
+              <div className="relative group">
+                <img
+                  src={user.avatar}
+                  alt="User Avatar"
+                  className="w-10 h-10 rounded-full cursor-pointer border-2 border-purple-500"
+                />
+                <div className="absolute top-full right-0 bg-gray-800 shadow-md rounded px-4 py-2 hidden group-hover:block z-50">
+                  <Link
+                    to="/channelDashboard"
+                    className="flex items-center gap-2 hover:text-purple-300"
+                  >
+                    <FiUser className="text-purple-500" />
+                    Profile
+                  </Link>
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 mt-2 text-left w-full hover:text-red-400 hover:cursor-pointer"
+                  >
+                    <FiLogOut className="text-red-600" />
+                    Logout
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -77,17 +134,22 @@ const Navbar = () => {
       {/* Mobile menu */}
       {isOpen && (
         <div className="md:hidden px-6 pb-4 space-y-3 text-lg font-medium">
-          <Link to="/" onClick={() => setIsOpen(false)} className="block hover:text-purple-400">Home</Link>
-          {!user ? (
-            <>
-              <Link to="/signup" onClick={() => setIsOpen(false)} className="block hover:text-purple-400">Sign Up</Link>
-              <Link to="/login" onClick={() => setIsOpen(false)} className="block hover:text-purple-400">Login</Link>
-            </>
-          ) : (
-            <>
-              <Link to="/profile" onClick={() => setIsOpen(false)} className="block hover:text-purple-400">Profile</Link>
-              <button onClick={handleLogout} className="block w-full text-left hover:text-red-400">Logout</button>
-            </>
+          <Link
+            to="/"
+            onClick={() => setIsOpen(false)}
+            className="block hover:text-purple-400"
+          >
+            Home
+          </Link>
+          {user && (
+            <div className="flex items-center space-x-3">
+              <img
+                src={user.avatar}
+                alt="Avatar"
+                className="w-8 h-8 rounded-full"
+              />
+              <span className="text-white">{user.username}</span>
+            </div>
           )}
         </div>
       )}

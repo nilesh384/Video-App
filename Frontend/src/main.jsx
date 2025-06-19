@@ -8,6 +8,8 @@ import Login from './Pages/Login.jsx'
 
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route } from 'react-router-dom'
 import Signup from './Pages/Signup.jsx'
+import ChannelDashboard from './Pages/Dashboard.jsx'
+
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -16,12 +18,15 @@ const router = createBrowserRouter(
       <Route index element={<Landing />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
+      <Route path='/channelDashboard' element={<ChannelDashboard />} />
     </Route>
   )
 )
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router}/>
+
+      <RouterProvider router={router}/>
+      
   </StrictMode>,
 )

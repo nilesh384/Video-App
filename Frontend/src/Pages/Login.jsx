@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../index.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    identifier: "", // combined field for email or username
+    identifier: "",
     password: "",
   });
 
@@ -27,14 +27,13 @@ const Login = () => {
 
   const validateForm = () => {
     const tempErrors = {};
-    if (!formData.identifier) tempErrors.identifier = "Username or Email is required";
+    if (!formData.identifier)
+      tempErrors.identifier = "Username or Email is required";
     if (!formData.password) tempErrors.password = "Password is required";
     return tempErrors;
   };
 
-  const isEmail = (value) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  };
+  const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,10 +54,11 @@ const Login = () => {
     try {
       const res = await fetch("http://localhost:8000/api/v1/users/login", {
         method: "POST",
+        credentials: "include", // ✅ absolutely required
+        body: JSON.stringify(loginPayload),
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(loginPayload),
       });
 
       let data;
@@ -66,7 +66,9 @@ const Login = () => {
         data = await res.json();
       } catch (jsonError) {
         const text = await res.text();
-        setErrors({ general: text || "Something went wrong. Please try again." });
+        setErrors({
+          general: text || "Something went wrong. Please try again.",
+        });
         setIsLoading(false);
         return;
       }
@@ -75,7 +77,25 @@ const Login = () => {
         setSuccessMsg(data.message || "✅ Logged in successfully!");
         setErrors({});
         setFormData({ identifier: "", password: "" });
-        setTimeout(() => navigate("/"), 1000);
+
+        // ✅ Save login info to localStorage
+        try {
+          localStorage.setItem("fullname", data.data.user.fullname);
+          localStorage.setItem("username", data.data.user.username);
+          localStorage.setItem("email", data.data.user.email);
+          localStorage.setItem("avatar", data.data.user.avatar);
+          localStorage.setItem("coverphoto", data.data.user.coverphoto);
+          localStorage.setItem("createdAt", data.data.user.createdAt);
+          localStorage.setItem("token", data.data.accessToken);
+        } catch (storageError) {
+          console.warn("LocalStorage not available:", storageError);
+        }
+
+        setTimeout(() => {
+          navigate("/"),
+          window.location.reload();
+        },
+           1000);
       } else {
         const newErrors = {};
 
@@ -122,10 +142,17 @@ const Login = () => {
       >
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
-        {errors.general && <p className="text-red-500 text-sm text-center mb-4">{errors.general}</p>}
-        {successMsg && <p className="text-green-400 text-sm text-center mb-4">{successMsg}</p>}
+        {errors.general && (
+          <p className="text-red-500 text-sm text-center mb-4">
+            {errors.general}
+          </p>
+        )}
+        {successMsg && (
+          <p className="text-green-400 text-sm text-center mb-4">
+            {successMsg}
+          </p>
+        )}
 
-        {/* Combined input for email/username */}
         <div className="mb-4">
           <input
             type="text"
@@ -133,11 +160,14 @@ const Login = () => {
             placeholder="Username or Email"
             value={formData.identifier}
             onChange={handleChange}
+            autoComplete="username"
             className={`w-full px-4 py-2 bg-gray-700 border ${
               errors.identifier ? "border-red-500" : "border-gray-600"
             } rounded focus:outline-none`}
           />
-          {errors.identifier && <p className="text-red-500 text-xs mt-1">{errors.identifier}</p>}
+          {errors.identifier && (
+            <p className="text-red-500 text-xs mt-1">{errors.identifier}</p>
+          )}
         </div>
 
         <div className="mb-4 relative">
@@ -147,6 +177,7 @@ const Login = () => {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
+            autoComplete="current-password"
             className={`w-full px-4 py-2 bg-gray-700 border ${
               errors.password ? "border-red-500" : "border-gray-600"
             } rounded focus:outline-none pr-12`}
@@ -154,21 +185,25 @@ const Login = () => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white hover:cursor-pointer"
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
             aria-label="Toggle Password Visibility"
           >
-            {showPassword ? 
-              <i class="fa-solid fa-eye"></i> :
-              <i class="fa-solid fa-eye-slash"></i>
-            }
+            {showPassword ? (
+              <i className="fa-solid fa-eye"></i>
+            ) : (
+              <i className="fa-solid fa-eye-slash"></i>
+            )}
           </button>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+          )}
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-purple-600 hover:bg-purple-700 hover:cursor-pointer transition-colors py-2 rounded font-semibold flex items-center justify-center"
+          aria-busy={isLoading}
+          className="w-full bg-purple-600 hover:bg-purple-700 transition-colors py-2 rounded font-semibold flex items-center justify-center"
         >
           {isLoading ? (
             <span className="flex gap-1">
@@ -180,11 +215,16 @@ const Login = () => {
             "Login"
           )}
         </button>
+
+        <div className="mt-4 text-center">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-purple-500 hover:text-purple-300">
+            Sign up
+          </Link>
+        </div>
       </motion.form>
     </div>
   );
 };
-
-
 
 export default Login;

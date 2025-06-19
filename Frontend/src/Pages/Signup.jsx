@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "../index.css";
 
@@ -256,6 +256,7 @@ const Signup = () => {
             "Sign Up"
           )}
         </button>
+        <div className="text-center mt-4">Already have an account? <Link to="/login" className="text-purple-500 hover:text-purple-300">Login</Link></div>
       </motion.form>
     </div>
   );
