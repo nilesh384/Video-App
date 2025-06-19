@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import {Link} from "react-router-dom";
 
 const ChannelDashboard = () => {
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+
 
   useEffect(() => {
     const fetchChannelStats = async () => {
@@ -128,23 +130,21 @@ const ChannelDashboard = () => {
             label="Subscribers"
             value={channel.stats.subscribers.toLocaleString()}
           />
-          <Stat
-            label="Views"
-            value={channel.stats.views.toLocaleString()}
-          />
-          <Stat
-            label="Likes"
-            value={channel.stats.likes.toLocaleString()}
-          />
+          <Stat label="Views" value={channel.stats.views.toLocaleString()} />
+          <Stat label="Likes" value={channel.stats.likes.toLocaleString()} />
           <Stat label="Joined" value={channel.stats.joined} />
         </div>
 
         {/* Edit Button (only for logged-in users) */}
         {user && (
           <div className="mt-6">
-            <button className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-full">
+            <Link to="/editchannel">
+              <button
+              className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-6 rounded-full hover:cursor-pointer"
+            >
               Edit Channel
             </button>
+            </Link>
           </div>
         )}
       </div>

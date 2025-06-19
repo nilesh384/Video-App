@@ -9,6 +9,7 @@ import Login from './Pages/Login.jsx'
 import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route } from 'react-router-dom'
 import Signup from './Pages/Signup.jsx'
 import ChannelDashboard from './Pages/Dashboard.jsx'
+import EditDetails from './Pages/EditDetails.jsx'
 
 
 const router = createBrowserRouter(
@@ -19,6 +20,7 @@ const router = createBrowserRouter(
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path='/channelDashboard' element={<ChannelDashboard />} />
+      <Route path='/editchannel' element={<EditDetails />} />
     </Route>
   )
 )

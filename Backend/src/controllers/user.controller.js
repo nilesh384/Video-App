@@ -316,7 +316,7 @@ const updateUserCoverImage = asyncHandler(async(req, res) => {
 
     // Step 1: Delete old cover from Cloudinary (if it exists and not default avatar)
     if (user.coverphoto && user.coverphoto.includes("res.cloudinary.com")) {
-        const publicId = extractPublicIdFromUrl(user.avatar);
+        const publicId = extractPublicIdFromUrl(user.coverphoto);
         await deleteOnCloudinary(publicId);
     }
 
