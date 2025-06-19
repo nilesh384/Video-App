@@ -10,6 +10,8 @@ import { createBrowserRouter, createRoutesFromElements, RouterProvider, Route } 
 import Signup from './Pages/Signup.jsx'
 import ChannelDashboard from './Pages/Dashboard.jsx'
 import EditDetails from './Pages/EditDetails.jsx'
+import YourVideos from './Pages/YourVideos.jsx'
+import UploadVideo from './Pages/UploadVideo.jsx'
 
 
 const router = createBrowserRouter(
@@ -21,6 +23,8 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />
       <Route path='/channelDashboard' element={<ChannelDashboard />} />
       <Route path='/editchannel' element={<EditDetails />} />
+      <Route path='/yourvideos'element={<YourVideos />} />
+      <Route path='/uploadvideo'element={<UploadVideo />} />
     </Route>
   )
 )
