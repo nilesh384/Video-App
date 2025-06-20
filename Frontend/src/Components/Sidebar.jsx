@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaHome, FaFire, FaThumbsUp, FaClock, FaVideo, FaUpload} from "react-icons/fa";
+import { FaHome, FaFire, FaThumbsUp, FaClock, FaVideo, FaUpload, FaHistory} from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 
 
@@ -14,6 +14,7 @@ function Sidebar() {
         <h1 className="text-2xl font-bold text-purple-500">PortfolioTube</h1>
         <nav className="space-y-4 text-sm ">
           <NavItem icon={<FaHome />} label="Dashboard" to="/channelDashboard" active={location.pathname == "/channelDashboard"} />
+          <NavItem icon={<FaHistory />} label="History" to="/history" active={location.pathname === "/history"} />
           <NavItem icon={<FaVideo />} label="Your Videos" to="/yourvideos" active={location.pathname === "/yourvideos"} />
           <NavItem icon={<FaUpload />} label="Upload Video" to="/uploadvideo" active={location.pathname === "/uploadvideo"} />
           <NavItem icon={<FaFire />} label="Trending" active={location.pathname === "/trending"} />

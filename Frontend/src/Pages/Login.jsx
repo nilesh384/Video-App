@@ -87,6 +87,7 @@ const Login = () => {
           localStorage.setItem("coverphoto", data.data.user.coverphoto);
           localStorage.setItem("createdAt", data.data.user.createdAt);
           localStorage.setItem("token", data.data.accessToken);
+          localStorage.setItem("userId", data.data.user._id);
         } catch (storageError) {
           console.warn("LocalStorage not available:", storageError);
         }

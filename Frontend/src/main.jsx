@@ -12,6 +12,7 @@ import ChannelDashboard from './Pages/Dashboard.jsx'
 import EditDetails from './Pages/EditDetails.jsx'
 import YourVideos from './Pages/YourVideos.jsx'
 import UploadVideo from './Pages/UploadVideo.jsx'
+import EditVideo from './Pages/EditVideo.jsx'
 
 
 const router = createBrowserRouter(
@@ -25,6 +26,7 @@ const router = createBrowserRouter(
       <Route path='/editchannel' element={<EditDetails />} />
       <Route path='/yourvideos'element={<YourVideos />} />
       <Route path='/uploadvideo'element={<UploadVideo />} />
+      <Route path='/editvideo/:videoId'element={<EditVideo />} />
     </Route>
   )
 )
