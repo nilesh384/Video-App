@@ -109,15 +109,15 @@ const YourVideos = () => {
                 key={video._id}
                 className="bg-[#1e293b] rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow"
               >
-                <img
-                  src={video.thumbnail}
-                  alt="Thumbnail"
-                  className="w-full h-40 object-cover rounded-md mb-4"
-                />
+                <Link to={`/video/${video._id}`}>
+                  <img
+                    src={video.thumbnail}
+                    alt="Thumbnail"
+                    className="w-full h-40 object-cover rounded-md mb-4"
+                  />
+                </Link>
 
-                <h3 className="text-lg font-semibold mb-1">
-                      {video.title}
-                    </h3>
+                <h3 className="text-lg font-semibold mb-1">{video.title}</h3>
 
                 <div className="flex items-start">
                   <div>
@@ -136,9 +136,9 @@ const YourVideos = () => {
                     />
                     <Link to={`/editvideo/${video._id}`}>
                       <FaEdit
-                      className="text-blue-500 cursor-pointer ml-2 mt-4 hover:scale-110 transition-transform"
-                      title="Edit Video"
-                    />
+                        className="text-blue-500 cursor-pointer ml-2 mt-4 hover:scale-110 transition-transform"
+                        title="Edit Video"
+                      />
                     </Link>
                   </div>
                 </div>

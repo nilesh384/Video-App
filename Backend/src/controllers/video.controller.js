@@ -1,8 +1,15 @@
 import Video from "../models/video.model.js";
+import Like from "../models/like.model.js";
+import Subscription from "../models/subscription.model.js";
+
 import asyncHandler from "../utils/asyncHandler.js";
 import { apiError } from "../utils/apiError.js";
 import apiResponse from "../utils/apiResponse.js";
-import { extractPublicIdFromUrl, uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js";
+import {
+  extractPublicIdFromUrl,
+  uploadOnCloudinary,
+  deleteOnCloudinary,
+} from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 
 const getAllVideos = asyncHandler(async (req, res) => {
@@ -101,23 +108,51 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  //TODO: get video by id
+  const userId = req.user?._id;
 
-  // validation of videoId
   if (!mongoose.Types.ObjectId.isValid(videoId)) {
     throw new apiError(400, "Invalid video id");
   }
 
-  //database call
   const video = await Video.findById(videoId).populate(
     "owner",
     "fullname username avatar"
   );
 
-  return res
-    .status(200)
-    .json(new apiResponse(200, video, "Video fetched successfully"));
+  if (!video) {
+    throw new apiError(404, "Video not found");
+  }
+
+  // Get video owner's ID
+  const channelId = video.owner._id;
+
+  // Check if user liked the video
+  const isLiked = userId
+    ? !!(await Like.findOne({ video: videoId, likedBy: userId }))
+    : false;
+
+  // Check if user is the owner of the video
+  const likeCount = await Like.countDocuments({ video: videoId });
+
+  // Check if user subscribed to the channel
+  const isSubscribed = userId
+    ? !!(await Subscription.findOne({ subscriber: userId, channel: channelId }))
+    : false;
+
+  // Count subscribers
+  const subscriberCount = await Subscription.countDocuments({ channel: channelId });
+
+  const videoObject = video.toObject();
+  videoObject.isLiked = isLiked;
+  videoObject.likeCount = likeCount;
+  videoObject.isSubscribed = isSubscribed;
+  videoObject.subscriberCount = subscriberCount;
+
+  return res.status(200).json(
+    new apiResponse(200, videoObject, "Video fetched successfully")
+  );
 });
+
 
 const updateVideoDetails = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
@@ -125,17 +160,17 @@ const updateVideoDetails = asyncHandler(async (req, res) => {
 
   const { title, description } = req.body;
 
-  if(!title && !description) {
+  if (!title && !description) {
     throw new apiError(400, "Title or description or thumbnail is required");
   }
- 
+
   //database call
   const video = await Video.findByIdAndUpdate(
     videoId,
     {
       $set: {
         title: title || Video.title,
-        description: description || Video.description
+        description: description || Video.description,
       },
     },
     { new: true }
@@ -150,35 +185,34 @@ const updateThumbnail = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   //TODO: update thumbnail
 
-  if(!req.file?.path){
+  if (!req.file?.path) {
     throw new apiError(400, "Thumbnail is required");
   }
 
   const video = await Video.findById(videoId);
 
-  if(!video){
-    throw new apiError(400, "Could not find the video")
+  if (!video) {
+    throw new apiError(400, "Could not find the video");
   }
 
   //delete from cloudinary
-  const oldThumbnailPublicId  = extractPublicIdFromUrl(video.thumbnail)
+  const oldThumbnailPublicId = extractPublicIdFromUrl(video.thumbnail);
   await deleteOnCloudinary(oldThumbnailPublicId, "image");
 
-  //upload new thumbnail on cloudinary 
+  //upload new thumbnail on cloudinary
   const newThumbnailUpload = await uploadOnCloudinary(req.file.path, "image");
 
-  if(!newThumbnailUpload){
-    throw new apiError(400, "Could not upload new thumbnail to cloudinary")
+  if (!newThumbnailUpload) {
+    throw new apiError(400, "Could not upload new thumbnail to cloudinary");
   }
 
   //update in database
   video.thumbnail = newThumbnailUpload.url;
-  await video.save({validateBeforeSave: false});
+  await video.save({ validateBeforeSave: false });
 
   return res
     .status(200)
     .json(new apiResponse(200, video, "Thumbnail updated successfully"));
-
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
@@ -188,7 +222,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   //database call
   const video = await Video.findById(videoId);
 
-  if(!video){
+  if (!video) {
     throw new apiError(404, "Video not found");
   }
 
@@ -204,36 +238,57 @@ const deleteVideo = asyncHandler(async (req, res) => {
   await video.deleteOne();
 
   return res
-  .status(200)
-  .json(new apiResponse(200, video, "Video deleted successfully"));
-
+    .status(200)
+    .json(new apiResponse(200, video, "Video deleted successfully"));
 });
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params;
-  
-    // Fetch video by ID
-    const video = await Video.findById(videoId);
-  
-    if (!video) {
-      throw new apiError(404, "Video not found");
-    }
-  
-    // Toggle the isPublished status
-    video.isPublished = !video.isPublished;
-  
-    // Save the updated video
-    await video.save({ validateBeforeSave: false });
-  
-    return res.status(200).json(
+  const { videoId } = req.params;
+
+  // Fetch video by ID
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new apiError(404, "Video not found");
+  }
+
+  // Toggle the isPublished status
+  video.isPublished = !video.isPublished;
+
+  // Save the updated video
+  await video.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(
       new apiResponse(
         200,
         video,
         `Video has been ${video.isPublished ? "published" : "unpublished"} successfully`
       )
     );
-  });
-  
+});
+
+const incrementVideoView = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new apiError(400, "Invalid video ID");
+  }
+
+  const video = await Video.findByIdAndUpdate(
+    videoId,
+    { $inc: { views: 1 } },
+    { new: true }
+  );
+
+  if (!video) {
+    throw new apiError(404, "Video not found");
+  }
+
+  res.status(200).json(new apiResponse(200, { views: video.views }, "View count updated"));
+});
+
 
 export {
   getAllVideos,
@@ -242,5 +297,6 @@ export {
   updateVideoDetails,
   deleteVideo,
   togglePublishStatus,
-  updateThumbnail
+  updateThumbnail,
+  incrementVideoView
 };

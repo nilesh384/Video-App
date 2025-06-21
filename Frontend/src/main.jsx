@@ -13,7 +13,7 @@ import EditDetails from './Pages/EditDetails.jsx'
 import YourVideos from './Pages/YourVideos.jsx'
 import UploadVideo from './Pages/UploadVideo.jsx'
 import EditVideo from './Pages/EditVideo.jsx'
-
+import VideoPage from './Pages/VideoPage.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,6 +27,7 @@ const router = createBrowserRouter(
       <Route path='/yourvideos'element={<YourVideos />} />
       <Route path='/uploadvideo'element={<UploadVideo />} />
       <Route path='/editvideo/:videoId'element={<EditVideo />} />
+      <Route path='/video/:videoId'element={<VideoPage />} />
     </Route>
   )
 )

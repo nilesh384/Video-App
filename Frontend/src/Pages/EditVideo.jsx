@@ -51,6 +51,7 @@ const EditVideo = () => {
       const result = await res.json();
       if (res.ok) {
         setMessage("Video details updated successfully");
+        setTimeout(() => {navigate("/yourvideos"), window.location.reload()}, 1000);
       } else {
         setMessage(result.message || "Update failed");
       }

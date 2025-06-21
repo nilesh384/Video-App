@@ -10,8 +10,8 @@ function Sidebar() {
   return (
     <div>
       {/* Side Nav */}
-      <aside className="w-60 h-screen bg-[#111827] p-6 space-y-6 hidden md:block">
-        <h1 className="text-2xl font-bold text-purple-500">PortfolioTube</h1>
+      <aside className="w-60 h-full bg-[#111827] p-6 space-y-6 hidden md:block">
+        
         <nav className="space-y-4 text-sm ">
           <NavItem icon={<FaHome />} label="Dashboard" to="/channelDashboard" active={location.pathname == "/channelDashboard"} />
           <NavItem icon={<FaHistory />} label="History" to="/history" active={location.pathname === "/history"} />
@@ -29,7 +29,7 @@ function Sidebar() {
 
 const NavItem = ({ icon, label, to, active }) => {
   const baseClasses = "flex items-center space-x-3 cursor-pointer px-2 py-2 rounded-md transition-all text-white";
-  const activeClass = active ? "bg-red-500" : "hover:bg-red-500";
+  const activeClass = active ? "bg-red-600" : "hover:bg-red-900";
 
   if (to) {
     return (
