@@ -14,7 +14,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
   }
 
   try {
-    const sortDirection = sortOrder === "asc" ? 1 : -1; // newest first by default
+    const sortDirection = sortOrder === "asc" ? 1 : -1;
 
     const aggregateQuery = [
       {
@@ -37,18 +37,19 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         $project: {
           content: 1,
-          owner: "$ownerDetails.username",
           createdAt: 1,
+          isEdited: 1, // ✅ Include isEdited field
+          owner: "$ownerDetails.username",
         },
       },
       {
-        $sort: { createdAt: sortDirection }, // 👈 SORT BY createdAt
+        $sort: { createdAt: sortDirection },
       },
     ];
 
     const options = {
       page: parseInt(page, 10) || 1,
-      limit: 3,
+      limit: parseInt(limit, 10) || 3,
     };
 
     const comments = await Comment.aggregatePaginate(aggregateQuery, options);
@@ -70,6 +71,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     throw new apiError(500, "Failed to retrieve comments");
   }
 });
+
 
 const addComment = asyncHandler(async (req, res) => {
   const { content } = req.body;
@@ -121,6 +123,7 @@ const updateComment = asyncHandler(async (req, res) => {
   }
 
   comment.content = content;
+  comment.isEdited = true;
   await comment.save({ validateBeforeSave: false });
 
   return res

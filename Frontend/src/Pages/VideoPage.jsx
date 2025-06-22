@@ -14,10 +14,38 @@ const VideoPage = () => {
   const [isLoadingComments, setLoadingComments] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState("");
-
   const hasCountedView = useRef(false);
   const token = localStorage.getItem("token");
   const currentUser = localStorage.getItem("username");
+
+  const timeAgo = (date) => {
+    const now = new Date();
+    const created = new Date(date);
+    const diffMs = now - created;
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffMonths / 12);
+
+    if (diffYears >= 1)
+      return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
+    if (diffMonths >= 12)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
+    if (diffDays === 0 && diffHours === 0 && diffMinutes === 0)
+      return "just now";
+    if (diffSeconds < 60)
+      return `${diffSeconds} second${diffSeconds !== 1 ? "s" : ""} ago`;
+    if (diffMinutes < 60)
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+    if (diffDays < 30) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+    if (diffMonths < 12)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
+    return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
+  };
 
   const fetchVideo = async () => {
     const res = await fetch(`http://localhost:8000/api/v1/videos/${videoId}`, {
@@ -69,7 +97,7 @@ const VideoPage = () => {
     if (res.ok) {
       setNewComment("");
       fetchComments(1);
-    }else{
+    } else {
       alert("Login to comment");
     }
   };
@@ -124,7 +152,7 @@ const VideoPage = () => {
         isLiked: data.isLiked,
         likeCount: data.likeCount,
       }));
-    }else{
+    } else {
       alert("Login to like");
     }
   };
@@ -144,7 +172,7 @@ const VideoPage = () => {
         isSubscribed: data.isSubscribed,
         subscriberCount: data.subscriberCount,
       }));
-    }else{
+    } else {
       alert("Login to subscribe");
     }
   };
@@ -181,7 +209,9 @@ const VideoPage = () => {
         <div className="flex justify-between items-start mb-6">
           <div>
             <h1 className="text-2xl font-bold">{videoData.title}</h1>
-            <p className="text-gray-400 mt-1">{videoData.views} views</p>
+            <p className="text-gray-400 mt-1">
+              {videoData.views} views • {timeAgo(videoData.createdAt)}
+            </p>
           </div>
           <div className="flex space-x-4">
             <button
@@ -265,45 +295,51 @@ const VideoPage = () => {
                         <div className="flex space-x-2 mt-2">
                           <button
                             onClick={() => handleEditComment(c._id)}
-                            className="bg-green-600 px-3 py-1 rounded"
+                            className="hover:cursor-pointer bg-green-600 px-3 py-1 rounded"
                           >
                             Save
                           </button>
                           <button
                             onClick={() => setEditingCommentId(null)}
-                            className="bg-red-600 px-3 py-1 rounded"
+                            className="hover:cursor-pointer bg-red-600 px-3 py-1 rounded"
                           >
                             Cancel
                           </button>
                         </div>
                       </>
                     ) : (
-                      <p className="text-gray-300">{c.content}</p>
+                      <p className="text-gray-300">
+                        {c.content}{" "}
+                        {c.isEdited && (
+                          <span className="text-xs text-gray-400 ml-2">
+                            (edited)
+                          </span>
+                        )}
+                      </p>
                     )}
                   </div>
                 </div>
                 <div className="text-xs text-gray-500">
-                  <p>{new Date(c.createdAt).toLocaleString()}</p>
-                  {c.owner === currentUser &&
-                    editingCommentId !== c._id && (
-                      <div className="flex gap-2 mt-1">
-                        <button
-                          onClick={() => {
-                            setEditContent(c.content);
-                            setEditingCommentId(c._id);
-                          }}
-                          className="hover:cursor-pointer hover:scale-105 hover:text-blue-400 text-blue-500"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteComment(c._id)}
-                          className="hover:cursor-pointer hover:scale-105 hover:text-red-400 text-red-500"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                  <p>{timeAgo(c.createdAt)}</p>
+                  {c.owner === currentUser && editingCommentId !== c._id && (
+                    <div className="flex gap-2 mt-1">
+                      <button
+                        onClick={() => {
+                          setEditContent(c.content);
+                          setEditingCommentId(c._id);
+                        }}
+                        className="hover:cursor-pointer hover:scale-105 hover:text-blue-400 text-blue-500"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteComment(c._id)}
+                        className="hover:cursor-pointer hover:scale-105 hover:text-red-400 text-red-500"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
