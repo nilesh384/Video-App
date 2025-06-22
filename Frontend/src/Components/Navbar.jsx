@@ -54,7 +54,14 @@ const Navbar = () => {
         console.log("Logout successful:", data.message);
         setUser(null);
         localStorage.removeItem("token");
-        
+        localStorage.removeItem("userId");
+        localStorage.removeItem("username");
+        localStorage.removeItem("fullname");
+        localStorage.removeItem("email");
+        localStorage.removeItem("avatar");
+        localStorage.removeItem("coverphoto");
+        localStorage.removeItem("createdAt");
+
         navigate("/login");
       } else {
         console.error("Logout failed with status:", response.status);
@@ -74,7 +81,7 @@ const Navbar = () => {
         <div className="hidden md:flex space-x-8 text-lg font-medium">
           {!user ? (
             <>
-              {/* <Link to="/signup" ...>Sign Up</Link> -- REMOVE THIS */}
+             
 
               <Link
                 to="/signup"
