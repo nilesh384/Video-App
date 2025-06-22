@@ -5,15 +5,12 @@ import { getVideoComments, addComment, updateComment, deleteComment } from "../c
 
 const router = Router();
 
-// 🔐 All like routes should be protected
-router.use(verifyJwt);
-
 router.route("/video/:videoId").get(getVideoComments);
 
-router.route("/add-comment/:videoId").post(addComment);
+router.route("/add-comment/:videoId").post(verifyJwt, addComment);
 
-router.route("/update-comment/:commentId").patch(updateComment);
+router.route("/update-comment/:commentId").patch(verifyJwt, updateComment);
 
-router.route("/delete-comment/:commentId").delete(deleteComment);
+router.route("/delete-comment/:commentId").delete(verifyJwt, deleteComment);
 
 export default router;

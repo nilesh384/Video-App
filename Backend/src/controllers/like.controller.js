@@ -16,31 +16,38 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
   }
 
   const video = await Video.findById(videoId);
-
   if (!video) {
-    throw new apiError(200, "video not found");
+    throw new apiError(404, "Video not found");
   }
 
   const existingLike = await Like.findOne({ video: videoId, likedBy: userId });
 
+  let isLiked;
   if (existingLike) {
-    // Remove like (unlike)
+    // Unlike
     await existingLike.deleteOne();
-    return res
-      .status(200)
-      .json(new apiResponse(200, null, "Video unliked successfully"));
-  }else{
+    isLiked = false;
+  } else {
+    // Like
     const newLike = await Like.create({ video: videoId, likedBy: userId });
-
-    if(!newLike){
-        throw new apiError(404, "could not like , some error occured")
+    if (!newLike) {
+      throw new apiError(500, "Could not like the video");
     }
-
-    return res
-    .status(200)
-    .json(new apiResponse(200, newLike, "Liked the video successfully"))
+    isLiked = true;
   }
+
+  // Get updated like count
+  const likeCount = await Like.countDocuments({ video: videoId });
+
+  return res.status(200).json(
+    new apiResponse(
+      200,
+      { isLiked, likeCount },
+      isLiked ? "Liked the video successfully" : "Video unliked successfully"
+    )
+  );
 });
+
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const { commentId } = req.params;

@@ -6,18 +6,19 @@ import mongoose from "mongoose";
 
 // Get comments for a specific video
 const getVideoComments = asyncHandler(async (req, res) => {
-  const { videoId } = req.params; // Video ID from URL params
-  const { page = 1, limit = 10 } = req.query; // Pagination parameters (page and limit)
+  const { videoId } = req.params;
+  const { page = 1, limit = 3, sortOrder = "desc" } = req.query;
 
   if (!mongoose.isValidObjectId(videoId)) {
     throw new apiError(400, "Invalid video ID");
   }
 
   try {
-    // Define the aggregate pipeline
+    const sortDirection = sortOrder === "asc" ? 1 : -1; // newest first by default
+
     const aggregateQuery = [
       {
-        $match: { video: new mongoose.Types.ObjectId(videoId) }, // Match comments for the specified video
+        $match: { video: new mongoose.Types.ObjectId(videoId) },
       },
       {
         $lookup: {
@@ -36,27 +37,22 @@ const getVideoComments = asyncHandler(async (req, res) => {
       {
         $project: {
           content: 1,
-          owner: "$ownerDetails.username", // Example: replacing with actual field
+          owner: "$ownerDetails.username",
           createdAt: 1,
         },
       },
+      {
+        $sort: { createdAt: sortDirection }, // 👈 SORT BY createdAt
+      },
     ];
 
-    // Define pagination options
     const options = {
       page: parseInt(page, 10) || 1,
-      limit: parseInt(limit, 10) || 10,
+      limit: 3,
     };
 
-    // Execute the aggregation query with pagination
     const comments = await Comment.aggregatePaginate(aggregateQuery, options);
 
-    // Check if comments are found
-    if (comments.totalDocs === 0) {
-      throw new apiError(404, "No comments found for this video");
-    }
-
-    // Send the response with paginated results
     return res.status(200).json(
       new apiResponse(
         200,

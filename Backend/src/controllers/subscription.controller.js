@@ -6,6 +6,9 @@ import asyncHandler from "../utils/asyncHandler.js";
 const toogleSubscription = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
 
+  let isSubscribed = false;
+
+  // Check if the subscription already exists
   const subscription = await Subscription.findOne({
     subscriber: req.user._id,
     channel: channelId,
@@ -16,17 +19,26 @@ const toogleSubscription = asyncHandler(async (req, res) => {
       subscriber: req.user._id,
       channel: channelId,
     });
-    return res
-      .status(200)
-      .json(new apiResponse(200, newSubscription, "Subscribed successfully"));
+
+    isSubscribed = true;
+  } else {
+    await subscription.deleteOne();
   }
 
-  await subscription.deleteOne();
+  // Get updated subscriber count for this channel
+  const subscriberCount = await Subscription.countDocuments({
+    channel: channelId,
+  });
 
-  return res
-    .status(200)
-    .json(new apiResponse(200, {}, "Unsubscribed successfully"));
+  return res.status(200).json(
+    new apiResponse(
+      200,
+      { isSubscribed, subscriberCount },
+      isSubscribed ? "Subscribed successfully" : "Unsubscribed successfully"
+    )
+  );
 });
+
 
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   const { channelId } = req.params;
