@@ -62,6 +62,17 @@ const VideoPage = () => {
     });
   };
 
+  const updateWatchHistory = async () => {
+    await fetch("http://localhost:8000/api/v1/users/history", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ videoId }),
+    });
+  };
+
   const fetchComments = async (pageNumber = 1, order = sortOrder) => {
     setLoadingComments(true);
     const res = await fetch(
@@ -186,6 +197,7 @@ const VideoPage = () => {
     if (videoData && !hasCountedView.current) {
       hasCountedView.current = true;
       incrementView();
+      updateWatchHistory(); // 👈 Add this line
     }
   }, [videoData]);
 

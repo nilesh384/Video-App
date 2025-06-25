@@ -34,7 +34,7 @@ router.route("/update-thumbnail/:videoId").patch(verifyJwt, upload.single("thumb
 
 router.route("/toggle/publish/:videoId").patch(verifyJwt, togglePublishStatus);
 
-router.route("/:videoId/view").post(incrementVideoView)
+router.route("/:videoId/view").post(verifyJwt, incrementVideoView)
 
 
 export default router

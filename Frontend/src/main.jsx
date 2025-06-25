@@ -14,6 +14,8 @@ import YourVideos from './Pages/YourVideos.jsx'
 import UploadVideo from './Pages/UploadVideo.jsx'
 import EditVideo from './Pages/EditVideo.jsx'
 import VideoPage from './Pages/VideoPage.jsx'
+import LikedVideos from './Pages/LikedVideos.jsx'
+import History from './Pages/History.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,6 +30,8 @@ const router = createBrowserRouter(
       <Route path='/uploadvideo'element={<UploadVideo />} />
       <Route path='/editvideo/:videoId'element={<EditVideo />} />
       <Route path='/video/:videoId'element={<VideoPage />} />
+      <Route path='/likedVideos'element={<LikedVideos />} />
+      <Route path='/history'element={<History />} />
     </Route>
   )
 )

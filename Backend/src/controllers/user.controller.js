@@ -397,61 +397,109 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
     )
 })
 
-const getWatchHistory = asyncHandler(async(req, res) => {
-    const user = await User.aggregate([
-        {
-            $match:{
-                _id:new mongoose.Types.ObjectId(req.user._id)                                  //as mongoose does not function in aggregation
-            }
-        },
-        {
-            $lookup: {
-                from: "videos",
-                localField: "watchHistory",
-                foreignField: "_id",
-                as: "watchHistory",
-                pipeline: [
-                    {
-                        $sort: { createdAt: -1 }
-                    },
-                    {
-                        $lookup: {
-                            from: "users",
-                            localField: "owner",
-                            foreignField: "_id",
-                            as: "owner",
-                            pipeline: [
-                                {
-                                    $project: {
-                                        fullname: 1,
-                                        username: 1,
-                                        avatar: 1
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        $addFields: {
-                            owner: { $first: "$owner" }
-                        }
-                    }
-                ]
-            }
-        }
-    ])
+const addToWatchHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { videoId } = req.body;
 
-    if (!user.length) {
-        return res.status(404).json(new apiResponse(404, null, "User not found"));
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new apiError(400, "Invalid video ID");
+  }
+
+  // Remove if already exists (to update position)
+  await User.findByIdAndUpdate(userId, {
+    $pull: { watchHistory: { video: videoId } }
+  });
+
+  // Add new entry to top
+  await User.findByIdAndUpdate(userId, {
+    $push: {
+      watchHistory: {
+        $each: [{ video: videoId, watchedAt: new Date() }],
+        $position: 0
       }
-      
+    }
+  });
 
-    return res
+  res
     .status(200)
-    .json(
-        new apiResponse(200, user[0].watchHistory, "Watch history fetched successfully")
-    )
-})
+    .json(new apiResponse(200, null, "Watch history updated"));
+});
+
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const userHistory = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $unwind: "$watchHistory",
+    },
+    {
+      $sort: {
+        "watchHistory.watchedAt": -1,
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory.video",
+        foreignField: "_id",
+        as: "video",
+      },
+    },
+    {
+      $unwind: "$video",
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "video.owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              fullname: 1,
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        "video.owner": { $first: "$owner" },
+        "video.watchedAt": "$watchHistory.watchedAt",
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: "$video",
+      },
+    },
+  ]);
+
+  return res.status(200).json(
+    new apiResponse(200, userHistory, "Watch history fetched successfully")
+  );
+});
+
+
+const clearWatchHistory = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, {
+    watchHistory: []
+  });
+
+  res
+    .status(200)
+    .json(new apiResponse(200, null, "Watch history cleared"));
+});
+
 
 export {registerUser, 
         loginUser, 
@@ -463,5 +511,7 @@ export {registerUser,
         updateUserAvatar,
         updateUserCoverImage,
         getUserChannelProfile,
-        getWatchHistory
+        addToWatchHistory,
+        getWatchHistory,
+        clearWatchHistory
 }

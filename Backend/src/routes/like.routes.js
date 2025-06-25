@@ -10,6 +10,7 @@ router.use(verifyJwt);
 
 // 🎥 VIDEO LIKES
 router.post("/video/:videoId", toggleVideoLike);
+
 router.get("/video", getLikedVideos);
 
 // 💬 COMMENT LIKES

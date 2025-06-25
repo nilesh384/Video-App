@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUpload } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
 const UploadVideo = () => {
   const navigate = useNavigate();
 
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [formData, setFormData] = useState({
@@ -21,6 +23,11 @@ const UploadVideo = () => {
   };
 
   const handleUpload = async () => {
+    if (!loggedIn) {
+      setShowLoginModal(true);
+      return;
+    }
+
     if (!videoFile || !thumbnailFile)
       return alert("Please select both video and thumbnail files");
 
@@ -53,10 +60,15 @@ const UploadVideo = () => {
         setVideoFile(null);
         setThumbnailFile(null);
         setTimeout(() => {
-          navigate("/yourvideos"), window.location.reload();
+          navigate("/yourvideos");
+          window.location.reload();
         }, 1000);
       } else {
-        throw new Error(result.message || "Upload failed");
+        if (result.message === "jwt expired") {
+          setLoggedIn(false);
+        } else {
+          throw new Error(result.message || "Upload failed");
+        }
       }
     } catch (err) {
       setUploadMessage(err.message);
@@ -65,8 +77,13 @@ const UploadVideo = () => {
     }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setLoggedIn(!!token);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white px-6 py-10">
+    <div className="min-h-screen bg-[#0f172a] text-white px-6 py-10 relative">
       <div className="max-w-3xl mx-auto bg-[#1e293b] p-8 rounded-xl shadow-md">
         <h2 className="text-2xl font-bold mb-6">Upload New Video</h2>
 
@@ -117,13 +134,49 @@ const UploadVideo = () => {
           className="bg-gradient-to-r from-indigo-500 hover:cursor-pointer via-purple-500 to-pink-500 hover:scale-105 transition-transform duration-300 px-6 py-2 font-semibold rounded-lg shadow-lg"
           disabled={isUploading}
         >
-          {isUploading ? "Uploading..." : "Upload Video"}
+          {isUploading ? (
+            "Uploading..."
+          ) : (
+            <div className="flex items-center">
+              <FaUpload className="inline mr-2" />
+              <p>Upload Video</p>
+            </div>
+          )}
         </button>
 
         {uploadMessage && (
           <p className="mt-4 text-green-400 font-medium">{uploadMessage}</p>
         )}
       </div>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-[#1e293b] p-6 rounded-xl shadow-lg max-w-sm text-center">
+            <h3 className="text-lg font-semibold text-white mb-4 ">Login Required</h3>
+            <p className="text-gray-300 mb-6">
+              You must be logged in to upload a video.
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
+                  setShowLoginModal(false);
+                  navigate("/login");
+                }}
+                className="bg-indigo-600 px-4 py-2 rounded text-white hover:bg-indigo-500 hover:cursor-pointer hover:scale-105 transition-transform duration-300"
+              >
+                Go to Login
+              </button>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="bg-gray-500 px-4 py-2 rounded text-white hover:bg-gray-400 hover:cursor-pointer hover:scale-105 transition-transform duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -19,7 +19,7 @@ function Sidebar() {
           <NavItem icon={<FaVideo />} label="Your Videos" to="/yourvideos" active={location.pathname === "/yourvideos"} />
           <NavItem icon={<FaUpload />} label="Upload Video" to="/uploadvideo" active={location.pathname === "/uploadvideo"} />
           <NavItem icon={<FaFire />} label="Trending" active={location.pathname === "/trending"} />
-          <NavItem icon={<FaThumbsUp />} label="Liked Videos" active={location.pathname === "/liked"} />
+          <NavItem icon={<FaThumbsUp />} label="Liked Videos" to="/likedVideos" active={location.pathname === "/liked"} />
           <NavItem icon={<FaClock />} label="Watch Later" active={location.pathname === "/watch-later"} />
 
         </nav>

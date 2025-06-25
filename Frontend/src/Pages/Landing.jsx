@@ -6,6 +6,35 @@ const Landing = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const timeAgo = (date) => {
+    const now = new Date();
+    const created = new Date(date);
+    const diffMs = now - created;
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffMonths / 12);
+
+    if (diffYears >= 1)
+      return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
+    if (diffMonths >= 12)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
+    if (diffDays === 0 && diffHours === 0 && diffMinutes === 0)
+      return "just now";
+    if (diffSeconds < 60)
+      return `${diffSeconds} second${diffSeconds !== 1 ? "s" : ""} ago`;
+    if (diffMinutes < 60)
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+    if (diffDays < 30) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
+    if (diffMonths < 12)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
+    return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
+  };
+
   const fetchVideos = async () => {
     try {
       const response = await fetch(
@@ -64,7 +93,7 @@ const Landing = () => {
                       </p>
                       <p className="text-xs text-gray-500">
                         {video.views || 0} views •{" "}
-                        {new Date(video.createdAt).toLocaleDateString()}
+                        {timeAgo(video.createdAt) || "Unknown"}
                       </p>
                     </div>
                   </div>
