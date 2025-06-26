@@ -16,12 +16,17 @@ const LikedVideos = () => {
     const diffMonths = Math.floor(diffDays / 30);
     const diffYears = Math.floor(diffMonths / 12);
 
-    if (diffYears >= 1) return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
-    if (diffMonths >= 1) return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
+    if (diffYears >= 1)
+      return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
+    if (diffMonths >= 1)
+      return `${diffMonths} month${diffMonths !== 1 ? "s" : ""} ago`;
     if (diffDays >= 1) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
-    if (diffHours >= 1) return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
-    if (diffMinutes >= 1) return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
-    if (diffSeconds >= 1) return `${diffSeconds} second${diffSeconds !== 1 ? "s" : ""} ago`;
+    if (diffHours >= 1)
+      return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
+    if (diffMinutes >= 1)
+      return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
+    if (diffSeconds >= 1)
+      return `${diffSeconds} second${diffSeconds !== 1 ? "s" : ""} ago`;
     return "just now";
   };
 
@@ -38,7 +43,8 @@ const LikedVideos = () => {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.message || "Failed to fetch liked videos");
+      if (!res.ok)
+        throw new Error(data.message || "Failed to fetch liked videos");
 
       setVideos(data.data || []);
     } catch (error) {
@@ -74,16 +80,25 @@ const LikedVideos = () => {
                     <div
                       className="h-40 bg-gray-700"
                       style={{
-                        backgroundImage: `url(${video.thumbnail || "/default-thumbnail.jpg"})`,
+                        backgroundImage: `url(${
+                          video.thumbnail || "/default-thumbnail.jpg"
+                        })`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                       }}
                     ></div>
                     <div className="p-4 space-y-1">
                       <h3 className="text-md font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-400">
-                        {video.owner?.username || "Unknown"}
-                      </p>
+                      <div className="flex space-x-2">
+                        <img
+                          src={video.owner?.avatar}
+                          alt={video.owner?.username}
+                          className="w-6 h-6 rounded-full"
+                        />
+                        <p className="text-sm text-gray-400">
+                          {video.owner?.username || "Unknown"}
+                        </p>
+                      </div>
                       <p className="text-xs text-gray-500">
                         {video.views || 0} views • {timeAgo(video.createdAt)}
                       </p>

@@ -41,7 +41,7 @@ const Landing = () => {
         "http://localhost:8000/api/v1/videos/get-all-videos"
       );
       const data = await response.json();
-      setVideos(data.data.videos); 
+      setVideos(data.data.videos);
     } catch (error) {
       console.error("Error fetching videos:", error);
     } finally {
@@ -76,7 +76,7 @@ const Landing = () => {
                 <Link to={`/video/${video._id}`}>
                   <div
                     key={idx}
-                    className="bg-[#1e293b] rounded-xl overflow-hidden shadow-md"
+                    className="bg-[#1e293b] rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform"
                   >
                     <div
                       className="h-40 bg-gray-700"
@@ -88,9 +88,16 @@ const Landing = () => {
                     ></div>
                     <div className="p-4 space-y-1">
                       <h3 className="text-md font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-400">
-                        {video.owner?.username || "Unknown"}
-                      </p>
+                      <div className="flex space-x-2">
+                        <img
+                          src={video.owner?.avatar}
+                          alt={video.owner?.username}
+                          className="w-6 h-6 rounded-full"
+                        />
+                        <p className="text-sm text-gray-400">
+                          {video.owner?.username || "Unknown"}
+                        </p>
+                      </div>
                       <p className="text-xs text-gray-500">
                         {video.views || 0} views •{" "}
                         {timeAgo(video.createdAt) || "Unknown"}

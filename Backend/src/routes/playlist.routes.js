@@ -1,6 +1,6 @@
 import { Router } from "express";
 import verifyJwt from "../middlewares/auth.middlewire.js";
-import {createPlaylist, getUserPlaylists, addVideoToPlaylist, deleteVideoFromPlaylist} from "../controllers/playlist.controller.js";
+import {createPlaylist, getUserPlaylists, addVideoToPlaylist, deleteVideoFromPlaylist, deletePlaylist} from "../controllers/playlist.controller.js";
 
 const router = Router();
 router.use(verifyJwt)
@@ -12,5 +12,7 @@ router.route("/get-user-playlists").get(getUserPlaylists);
 router.route("/add-video-to-playlist/:playlistId/:videoId").post(addVideoToPlaylist);
 
 router.route("/delete-video-from-playlist/:playlistId/:videoId").delete(deleteVideoFromPlaylist);
+
+router.route("/delete-playlist/:playlistId").delete(deletePlaylist);
 
 export default router

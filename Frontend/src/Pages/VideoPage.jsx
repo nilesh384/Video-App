@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { FaThumbsUp, FaRegThumbsUp } from "react-icons/fa";
+import { FaThumbsUp, FaRegThumbsUp, FaPlus } from "react-icons/fa";
 import { BsFillPersonPlusFill } from "react-icons/bs";
 
 const VideoPage = () => {
@@ -14,6 +14,14 @@ const VideoPage = () => {
   const [isLoadingComments, setLoadingComments] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editContent, setEditContent] = useState("");
+  const [playlists, setPlaylists] = useState([]);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+  const [creatingPlaylistModal, setCreatingPlaylistModal] = useState(false);
+  const [creatingPlaylistError, setCreatingPlaylistError] = useState("");
+  const [message, setMessage] = useState("");
+
   const hasCountedView = useRef(false);
   const token = localStorage.getItem("token");
   const currentUser = localStorage.getItem("username");
@@ -188,6 +196,70 @@ const VideoPage = () => {
     }
   };
 
+  const fetchUserPlaylists = async () => {
+    const res = await fetch(
+      "http://localhost:8000/api/v1/playlist/get-user-playlists",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    const { data } = await res.json();
+    if (res.ok) setPlaylists(data);
+  };
+
+  const handleAddToPlaylist = async (playlistId) => {
+    const res = await fetch(
+      `http://localhost:8000/api/v1/playlist/add-video-to-playlist/${playlistId}/${videoId}`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (res.ok) {
+      setMessage("Video added to playlist ✅");
+      setTimeout(() => {setShowPlaylistModal(false); setMessage("");}, 1500)
+    } else {
+      const { message } = await res.json();
+      setMessage(message || "Failed to add video");
+    }
+  };
+
+  const handleCreatePlaylist = async () => {
+    if (!newPlaylistName.trim()) return alert("Playlist name is required");
+
+    setCreatingPlaylistModal(true);
+
+    const res = await fetch(
+      "http://localhost:8000/api/v1/playlist/create-playlist",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newPlaylistName.trim(),
+          description: newPlaylistDesc.trim(),
+        }),
+      }
+    );
+
+    const { data, message } = await res.json();
+
+    if (res.ok) {
+      setPlaylists((prev) => [...prev, data]); // Add new playlist to state
+      setNewPlaylistName("");
+      setNewPlaylistDesc("");
+      setCreatingPlaylistError(message);
+    } else {
+      setCreatingPlaylistError(message || "Failed to create playlist");
+    }
+    setTimeout(() => {
+      setCreatingPlaylistError(""), setCreatingPlaylistModal(false);
+    }, 1500);
+  };
+
   useEffect(() => {
     fetchVideo();
     fetchComments(1);
@@ -196,6 +268,7 @@ const VideoPage = () => {
   useEffect(() => {
     if (videoData && !hasCountedView.current) {
       hasCountedView.current = true;
+      fetchUserPlaylists();
       incrementView();
       updateWatchHistory(); // 👈 Add this line
     }
@@ -239,6 +312,80 @@ const VideoPage = () => {
               )}
               {videoData.isLiked ? "Liked" : "Like"} ({videoData.likeCount})
             </button>
+
+            <button
+              onClick={() => setShowPlaylistModal(true)}
+              className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg hover:scale-105 transition-transform hover:cursor-pointer"
+            >
+              🎶 Save to Playlist
+            </button>
+            {showPlaylistModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+                <div className="bg-[#1e293b] p-6 rounded-lg w-96">
+                  <div className="flex justify-between">
+                    <h3 className="text-white text-xl mb-4">Select Playlist</h3>
+                    <FaPlus
+                      className="text-white hover:cursor-pointer mt-1 size-6"
+                      onClick={() => setCreatingPlaylistModal(true)}
+                    />
+                  </div>
+                  <ul className="space-y-2 max-h-60 overflow-y-auto">
+                    {playlists.map((playlist) => (
+                      <li
+                        key={playlist._id}
+                        className="bg-gray-800 p-3 rounded hover:bg-gray-700 cursor-pointer text-white"
+                        onClick={() => handleAddToPlaylist(playlist._id)}
+                      >
+                        {playlist.name}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-green-500 mt-4 transition-ease duration 1000">{message}</p>
+                  <button
+                    className="mt-4 bg-red-600 px-4 py-2 hover:bg-red-500 text-white hover:cursor-pointer hover:scale-105 transition-transform rounded-3xl"
+                    onClick={() => setShowPlaylistModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {creatingPlaylistModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+                <div className="bg-[#1e293b] p-6 rounded-lg w-96">
+                  <h3 className="text-white text-xl mb-4">Create Playlist</h3>
+                  <input
+                    type="text"
+                    placeholder="Playlist Name"
+                    value={newPlaylistName}
+                    onChange={(e) => setNewPlaylistName(e.target.value)}
+                    className="bg-gray-800 p-3 rounded mb-4 w-full text-white"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Playlist Description"
+                    value={newPlaylistDesc}
+                    onChange={(e) => setNewPlaylistDesc(e.target.value)}
+                    className="bg-gray-800 p-3 rounded mb-4 w-full text-white"
+                  />
+                  <button
+                    className="bg-green-600 px-4 py-2 rounded-3xl hover:bg-green-500 text-white hover:cursor-pointer mr-4 hover:scale-105 transition-transform"
+                    onClick={handleCreatePlaylist}
+                  >
+                    Create
+                  </button>
+                  <button
+                    className="mt-4 bg-red-600 px-4 py-2 rounded-3xl hover:bg-red-500 text-white hover:cursor-pointer ml-4 hover:scale-105 transition-transform"
+                    onClick={() => setCreatingPlaylistModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <p className="text-green-500 mt-2">{creatingPlaylistError}</p>
+                </div>
+              </div>
+            )}
+
             <button
               onClick={handleSubscribe}
               className={`hover:cursor-pointer flex items-center px-3 py-2 rounded-lg ${
@@ -361,7 +508,7 @@ const VideoPage = () => {
             <button
               onClick={() => fetchComments(page + 1)}
               disabled={isLoadingComments}
-              className="mt-4 w-full bg-purple-600 py-2 rounded hover:bg-purple-500"
+              className="mt-4 w-full bg-purple-600 py-2 rounded hover:bg-purple-500 hover:cursor-pointer"
             >
               {isLoadingComments ? "Loading..." : "Load more comments"}
             </button>

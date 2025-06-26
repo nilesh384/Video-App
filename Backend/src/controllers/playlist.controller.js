@@ -23,23 +23,30 @@ const createPlaylist = asyncHandler(async(req, res) => {
     .json(new apiResponse(200, playlist, "Playlist created successfully"))
 })
 
-const getUserPlaylists = asyncHandler(async(req, res) => {
-    const userId = req.user._id;
+const getUserPlaylists = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
 
-    if (!userId) {
-        throw new apiError(400, "Valid userId is required");
-    }
+  if (!userId) {
+    throw new apiError(400, "Valid userId is required");
+  }
 
-    const playlists = await Playlist.find({owner: userId}).populate("videos");
+  const playlists = await Playlist.find({ owner: userId }).populate({
+    path: "videos",
+    populate: {
+      path: "owner",
+      select: "username avatar", // only return these fields
+    },
+  });
 
-    if (!playlists || playlists.length === 0) {
-        throw new apiError(404, "No playlists found for this user");
-    }
+  if (!playlists || playlists.length === 0) {
+    throw new apiError(404, "No playlists found for this user");
+  }
 
-    return res
+  return res
     .status(200)
-    .json(new apiResponse(200, playlists, "Users playlist fetched successfully"))
-})
+    .json(new apiResponse(200, playlists, "User's playlists fetched successfully"));
+});
+
 
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
@@ -115,9 +122,35 @@ const deleteVideoFromPlaylist = asyncHandler(async (req, res) => {
     .json(new apiResponse(200, playlist, "Video deleted from playlist successfully"))
 })
 
+const deletePlaylist = asyncHandler(async (req, res) => {
+    const { playlistId } = req.params;
+
+    if (!playlistId || !mongoose.Types.ObjectId.isValid(playlistId)) {
+        throw new apiError(400, "Valid playlistId is required");
+    }
+
+    const playlist = await Playlist.findById(playlistId);
+
+    if (!playlist) {
+        throw new apiError(404, "Playlist not found");
+    }
+
+    // Check ownership
+    if (playlist.owner.toString() !== req.user._id.toString()) {
+        throw new apiError(403, "You are not authorized to delete this playlist");
+    }
+
+    await Playlist.findByIdAndDelete(playlistId);
+
+    return res
+        .status(200)
+        .json(new apiResponse(200, {}, "Playlist deleted successfully"));
+});
+
 export {
     createPlaylist,
     getUserPlaylists,
     addVideoToPlaylist,
-    deleteVideoFromPlaylist
+    deleteVideoFromPlaylist,
+    deletePlaylist
 }

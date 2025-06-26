@@ -39,7 +39,9 @@ const History = () => {
         },
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to fetch history");
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to fetch history");
+      }
 
       // Sort by watchedAt (descending)
       const sorted = [...(data.data || [])].sort(
@@ -122,9 +124,16 @@ const History = () => {
                       <h3 className="text-md font-semibold truncate">
                         {video.title}
                       </h3>
-                      <p className="text-sm text-gray-400">
-                        {video.owner?.username || "Unknown"}
-                      </p>
+                      <div className="flex space-x-2">
+                        <img
+                          src={video.owner?.avatar}
+                          alt={video.owner?.username}
+                          className="w-6 h-6 rounded-full"
+                        />
+                        <p className="text-sm text-gray-400">
+                          {video.owner?.username || "Unknown"}
+                        </p>
+                      </div>
                       <p className="text-xs text-gray-500">
                         {video.views || 0} views • {timeAgo(video.createdAt)}
                       </p>

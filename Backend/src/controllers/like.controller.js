@@ -125,15 +125,26 @@ const getLikedVideos = asyncHandler(async (req, res) => {
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new apiError(400, "Invalid user ID");
-}
+  }
 
-  const likedVideoEntries = await Like.find({ likedBy: userId, video: {$exists: true}}).populate("video");
+  const likedVideoEntries = await Like.find({
+    likedBy: userId,
+    video: { $exists: true },
+  })
+    .populate({
+      path: "video",
+      populate: {
+        path: "owner",
+        select: "username avatar", // Only fetch these fields
+      },
+    });
 
-  const likedVideos = likedVideoEntries.map(entry => entry.video)
+  const likedVideos = likedVideoEntries.map((entry) => entry.video);
 
-  return res
-  .status(200)
-  .json(new apiResponse(200, likedVideos, "all videos liked fetched successfully"))
+  return res.status(200).json(
+    new apiResponse(200, likedVideos, "All liked videos fetched successfully")
+  );
 });
+
 
 export { toggleCommentLike, toggleVideoLike, toggleTweetLike, getLikedVideos };

@@ -107,13 +107,13 @@ const YourVideos = () => {
             {videos.map((video) => (
               <div
                 key={video._id}
-                className="bg-[#1e293b] rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow"
+                className="bg-[#1e293b] rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow hover:scale-105 transition-transform"
               >
                 <Link to={`/video/${video._id}`}>
                   <img
                     src={video.thumbnail}
                     alt="Thumbnail"
-                    className="w-full h-40 object-cover rounded-md mb-4"
+                    className="w-full h-40 object-cover rounded-md mb-4 "
                   />
                 </Link>
 

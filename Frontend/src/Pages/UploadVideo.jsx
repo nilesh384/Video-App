@@ -95,6 +95,11 @@ const UploadVideo = () => {
             onChange={(e) => setVideoFile(e.target.files[0])}
             className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-700 hover:file:cursor-pointer file:text-white hover:file:bg-purple-600"
           />
+          {videoFile ? (<video
+          className="w-60 h-50"
+            src={videoFile ? URL.createObjectURL(videoFile) : ""}
+            controls
+          ></video>):(<></>)}
         </div>
 
         <div className="mb-4">
@@ -105,6 +110,11 @@ const UploadVideo = () => {
             onChange={(e) => setThumbnailFile(e.target.files[0])}
             className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-700 hover:file:cursor-pointer file:text-white hover:file:bg-purple-600"
           />
+          {thumbnailFile ? (<img
+          className="w-60 h-35 mt-8"
+            src={thumbnailFile ? URL.createObjectURL(thumbnailFile) : ""}
+            alt="Thumbnail"
+          />):(<></>)}
         </div>
 
         <div className="mb-4">
