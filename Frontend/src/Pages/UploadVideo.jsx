@@ -87,7 +87,7 @@ const UploadVideo = () => {
       <div className="max-w-3xl mx-auto bg-[#1e293b] p-8 rounded-xl shadow-md">
         <h2 className="text-2xl font-bold mb-6">Upload New Video</h2>
 
-        <div className="mb-4">
+        <div className="mb-4 group relative w-fit">
           <label className="block mb-1">Video File</label>
           <input
             type="file"
@@ -95,14 +95,20 @@ const UploadVideo = () => {
             onChange={(e) => setVideoFile(e.target.files[0])}
             className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-700 hover:file:cursor-pointer file:text-white hover:file:bg-purple-600"
           />
-          {videoFile ? (<video
-          className="w-60 h-50"
-            src={videoFile ? URL.createObjectURL(videoFile) : ""}
-            controls
-          ></video>):(<></>)}
+          <span className="absolute bottom-2 -left-14 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+            Choose video
+          </span>
+
+          {videoFile && (
+            <video
+              className="w-60 h-50 mt-4"
+              src={URL.createObjectURL(videoFile)}
+              controls
+            ></video>
+          )}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 group relative w-fit">
           <label className="block mb-1">Thumbnail Image</label>
           <input
             type="file"
@@ -110,14 +116,20 @@ const UploadVideo = () => {
             onChange={(e) => setThumbnailFile(e.target.files[0])}
             className="w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-purple-700 hover:file:cursor-pointer file:text-white hover:file:bg-purple-600"
           />
-          {thumbnailFile ? (<img
-          className="w-60 h-35 mt-8"
-            src={thumbnailFile ? URL.createObjectURL(thumbnailFile) : ""}
-            alt="Thumbnail"
-          />):(<></>)}
+          <span className="absolute bottom-2 -left-16 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+            Choose thumbnail
+          </span>
+
+          {thumbnailFile && (
+            <img
+              className="w-60 h-35 mt-4"
+              src={URL.createObjectURL(thumbnailFile)}
+              alt="Thumbnail"
+            />
+          )}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 group relative w-full">
           <input
             type="text"
             placeholder="Title"
@@ -126,9 +138,12 @@ const UploadVideo = () => {
             onChange={handleInputChange}
             className="w-full bg-gray-700 px-4 py-2 rounded"
           />
+          <span className="absolute -left-12 bottom-2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+            Title
+          </span>
         </div>
 
-        <div className="mb-4">
+        <div className="mb-4 group relative w-full">
           <textarea
             name="description"
             placeholder="Description"
@@ -137,6 +152,9 @@ const UploadVideo = () => {
             className="w-full bg-gray-700 px-4 py-2 rounded"
             rows="4"
           ></textarea>
+          <span className="absolute -left-22 bottom-12 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+            Description
+          </span>
         </div>
 
         <button
@@ -163,7 +181,9 @@ const UploadVideo = () => {
       {showLoginModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50">
           <div className="bg-[#1e293b] p-6 rounded-xl shadow-lg max-w-sm text-center">
-            <h3 className="text-lg font-semibold text-white mb-4 ">Login Required</h3>
+            <h3 className="text-lg font-semibold text-white mb-4 ">
+              Login Required
+            </h3>
             <p className="text-gray-300 mb-6">
               You must be logged in to upload a video.
             </p>

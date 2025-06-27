@@ -435,7 +435,7 @@ const VideoPage = () => {
                 <div className="flex items-start space-x-3">
                   <img
                     src={
-                      localStorage.getItem(`avatar_${c.owner}`) ||
+                      c.avatar ||
                       "/default-avatar.png"
                     }
                     onError={(e) => (e.target.src = "/default-avatar.png")}

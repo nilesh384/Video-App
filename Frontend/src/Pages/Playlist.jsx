@@ -11,16 +11,23 @@ const Playlist = () => {
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
   const [creatingPlaylistError, setCreatingPlaylistError] = useState("");
-  const [deleteConfirmModal, setDeleteConfirmModal] = useState({ show: false, type: '', id: '' });
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    show: false,
+    type: "",
+    id: "",
+  });
 
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const fetchPlaylists = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/playlist/get-user-playlists", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch(
+        "http://localhost:8000/api/v1/playlist/get-user-playlists",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       const { data } = await res.json();
       if (res.ok) setPlaylists(data);
     } catch (error) {
@@ -33,17 +40,20 @@ const Playlist = () => {
   const handleCreatePlaylist = async () => {
     if (!newPlaylistName.trim()) return;
 
-    const res = await fetch("http://localhost:8000/api/v1/playlist/create-playlist", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: newPlaylistName.trim(),
-        description: newPlaylistDesc.trim(),
-      }),
-    });
+    const res = await fetch(
+      "http://localhost:8000/api/v1/playlist/create-playlist",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newPlaylistName.trim(),
+          description: newPlaylistDesc.trim(),
+        }),
+      }
+    );
 
     const { data, message } = await res.json();
 
@@ -63,25 +73,34 @@ const Playlist = () => {
   };
 
   const confirmDelete = async () => {
-    if (deleteConfirmModal.type === 'playlist') {
-      const res = await fetch(`http://localhost:8000/api/v1/playlist/delete-playlist/${deleteConfirmModal.id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+    if (deleteConfirmModal.type === "playlist") {
+      const res = await fetch(
+        `http://localhost:8000/api/v1/playlist/delete-playlist/${deleteConfirmModal.id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (res.ok) {
-        setPlaylists((prev) => prev.filter((p) => p._id !== deleteConfirmModal.id));
-        if (selectedPlaylistId === deleteConfirmModal.id) setSelectedPlaylistId(null);
+        setPlaylists((prev) =>
+          prev.filter((p) => p._id !== deleteConfirmModal.id)
+        );
+        if (selectedPlaylistId === deleteConfirmModal.id)
+          setSelectedPlaylistId(null);
       }
-    } else if (deleteConfirmModal.type === 'video') {
+    } else if (deleteConfirmModal.type === "video") {
       const playlistId = selectedPlaylistId;
       const videoId = deleteConfirmModal.id;
-      await fetch(`http://localhost:8000/api/v1/playlist/delete-video-from-playlist/${playlistId}/${videoId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await fetch(
+        `http://localhost:8000/api/v1/playlist/delete-video-from-playlist/${playlistId}/${videoId}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       fetchPlaylists();
     }
-    setDeleteConfirmModal({ show: false, type: '', id: '' });
+    setDeleteConfirmModal({ show: false, type: "", id: "" });
   };
 
   useEffect(() => {
@@ -110,7 +129,10 @@ const Playlist = () => {
             <div
               key={playlist._id}
               className={`bg-gray-800 rounded-lg p-4 hover:bg-gray-700 cursor-pointer transition relative ${
-                selectedPlaylistId === playlist._id ? "border border-purple-500" : "" }`}
+                selectedPlaylistId === playlist._id
+                  ? "border border-purple-500"
+                  : ""
+              }`}
               onClick={() =>
                 setSelectedPlaylistId(
                   selectedPlaylistId === playlist._id ? null : playlist._id
@@ -119,16 +141,30 @@ const Playlist = () => {
             >
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">{playlist.name}</h2>
-                <FaTrash
-                  className="text-xl opacity-80 hover:text-red-500 hover:scale-125 transition"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteConfirmModal({ show: true, type: 'playlist', id: playlist._id });
-                  }}
-                />
+                <div className="group relative w-fit">
+                  <FaTrash
+                    className="text-xl opacity-80 hover:text-red-500 hover:scale-125 transition cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteConfirmModal({
+                        show: true,
+                        type: "playlist",
+                        id: playlist._id,
+                      });
+                    }}
+                  />
+                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+                    Delete playlist
+                  </span>
+                </div>
               </div>
-              <p className="text-sm text-gray-400 mt-1">{playlist.description || "No description"}</p>
-              <p className="text-sm text-gray-300 mt-2">🎥 {playlist.videos.length} video{playlist.videos.length !== 1 && "s"}</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {playlist.description || "No description"}
+              </p>
+              <p className="text-sm text-gray-300 mt-2">
+                🎥 {playlist.videos.length} video
+                {playlist.videos.length !== 1 && "s"}
+              </p>
             </div>
           ))}
         </div>
@@ -136,38 +172,60 @@ const Playlist = () => {
 
       {selectedPlaylist && (
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">📺 {selectedPlaylist.name} - Videos</h2>
+          <h2 className="text-2xl font-semibold mb-4">
+            📺 {selectedPlaylist.name} - Videos
+          </h2>
           {selectedPlaylist.videos.length === 0 ? (
             <p>No videos in this playlist.</p>
           ) : (
             <div className="grid md:grid-cols-3 gap-6">
               {selectedPlaylist.videos.map((video) => (
-                <div key={video._id} className="bg-gray-800 rounded-lg p-4 relative group">
-                  <div onClick={() => navigate(`/video/${video._id}`)} className="cursor-pointer">
+                <div
+                  key={video._id}
+                  className="bg-gray-800 rounded-lg p-4 relative group hover:cursor-pointer hover:scale-105 transition duration-200"
+                >
+                  <div
+                    onClick={() => navigate(`/video/${video._id}`)}
+                    className="cursor-pointer"
+                  >
                     <div className="w-full h-48 bg-black mb-2 rounded-lg overflow-hidden">
                       <img
                         src={video.thumbnail || "/default-thumbnail.jpg"}
                         alt={video.title}
                         className="w-full h-full object-cover"
-                        onError={(e) => (e.target.src = "/default-thumbnail.jpg")}
+                        onError={(e) =>
+                          (e.target.src = "/default-thumbnail.jpg")
+                        }
                       />
                     </div>
                     <h3 className="text-lg font-semibold">{video.title}</h3>
                     <div className="flex space-x-2">
-                        <img
-                          src={video.owner?.avatar}
-                          alt={video.owner?.username}
-                          className="w-6 h-6 rounded-full"
-                        />
-                        <p className="text-sm text-gray-400">
-                          {video.owner?.username || "Unknown"}
-                        </p>
-                      </div>
+                      <img
+                        src={video.owner?.avatar}
+                        alt={video.owner?.username}
+                        className="w-6 h-6 rounded-full"
+                      />
+                      <p className="text-sm text-gray-400">
+                        {video.owner?.username || "Unknown"}
+                      </p>
+                    </div>
                   </div>
-                  <FaTrash
-                    className="absolute bottom-10 right-3 text-xl text-red-500 hover:cursor-pointer opacity-80 hover:opacity-100 hover:scale-110 transition"
-                    onClick={() => setDeleteConfirmModal({ show: true, type: 'video', id: video._id })}
-                  />
+                  <div className="group absolute w-fit bottom-9 right-4">
+                    <FaTrash
+                      className="text-xl text-red-500 cursor-pointer opacity-80 hover:opacity-100 hover:scale-110 transition-transform duration-200"
+                      onClick={() =>
+                        setDeleteConfirmModal({
+                          show: true,
+                          type: "video",
+                          id: video._id,
+                        })
+                      }
+                    />
+
+                    <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+                      Delete video
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -206,7 +264,9 @@ const Playlist = () => {
               Cancel
             </button>
             {creatingPlaylistError && (
-              <p className="text-center mt-2 text-sm text-yellow-400">{creatingPlaylistError}</p>
+              <p className="text-center mt-2 text-sm text-yellow-400">
+                {creatingPlaylistError}
+              </p>
             )}
           </div>
         </div>
@@ -225,7 +285,9 @@ const Playlist = () => {
               </button>
               <button
                 className="bg-gray-600 hover:bg-gray-500 hover:cursor-pointer px-4 py-2 rounded text-white"
-                onClick={() => setDeleteConfirmModal({ show: false, type: '', id: '' })}
+                onClick={() =>
+                  setDeleteConfirmModal({ show: false, type: "", id: "" })
+                }
               >
                 No
               </button>

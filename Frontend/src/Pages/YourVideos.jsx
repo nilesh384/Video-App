@@ -107,7 +107,7 @@ const YourVideos = () => {
             {videos.map((video) => (
               <div
                 key={video._id}
-                className="bg-[#1e293b] rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow hover:scale-105 transition-transform"
+                className="bg-[#1e293b] rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow hover:scale-105"
               >
                 <Link to={`/video/${video._id}`}>
                   <img
@@ -128,17 +128,27 @@ const YourVideos = () => {
                     <p className="text-sm text-gray-400">{video.views} views</p>
                   </div>
 
-                  <div className="flex-col items-center ml-auto">
-                    <RiDeleteBin6Fill
-                      className="text-red-500 cursor-pointer ml-2 hover:scale-110 transition-transform"
-                      onClick={() => handleDelete(video._id)}
-                      title="Delete Video"
-                    />
-                    <Link to={`/editvideo/${video._id}`}>
-                      <FaEdit
-                        className="text-blue-500 cursor-pointer ml-2 mt-4 hover:scale-110 transition-transform"
-                        title="Edit Video"
+                  <div className="flex flex-col items-center ml-auto space-y-4">
+                    {/* Delete Icon + Tooltip */}
+                    <div className="group relative w-fit">
+                      <RiDeleteBin6Fill
+                        className="text-red-500 cursor-pointer ml-2 hover:scale-110 transition-transform"
+                        onClick={() => handleDelete(video._id)}
                       />
+                      <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+                        Delete Video
+                      </span>
+                    </div>
+
+                    {/* Edit Icon + Tooltip */}
+                    <Link
+                      to={`/editvideo/${video._id}`}
+                      className="group relative w-fit"
+                    >
+                      <FaEdit className="text-blue-500 cursor-pointer ml-2 hover:scale-110 transition-transform" />
+                      <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+                        Edit Video
+                      </span>
                     </Link>
                   </div>
                 </div>

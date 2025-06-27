@@ -38,8 +38,9 @@ const getVideoComments = asyncHandler(async (req, res) => {
         $project: {
           content: 1,
           createdAt: 1,
-          isEdited: 1, // ✅ Include isEdited field
+          isEdited: 1, 
           owner: "$ownerDetails.username",
+          avatar: "$ownerDetails.avatar",
         },
       },
       {
