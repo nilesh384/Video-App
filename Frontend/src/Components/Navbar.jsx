@@ -16,7 +16,7 @@ const Navbar = () => {
           {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // important!
+              Authorization: `Bearer ${token}`, 
             },
           }
         );
@@ -43,7 +43,7 @@ const Navbar = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // required
+            Authorization: `Bearer ${localStorage.getItem("token")}`, 
           },
           // credentials: "include", // this allows cookies like refreshToken/accessToken to be sent
         }
@@ -101,11 +101,14 @@ const Navbar = () => {
             <div className="flex items-center">
               <FiBell className="text-2xl cursor-pointer mr-10 hover:text-yellow-300 " />
               <div className="relative group">
-                <img
+                <div className="flex items-center gap-2.5 hover:cursor-pointer italic">
+                  <p>{user.username}</p>
+                  <img
                   src={user.avatar}
                   alt="User Avatar"
                   className="w-10 h-10 rounded-full cursor-pointer border-2 border-purple-500"
                 />
+                </div>
                 <div className="absolute top-full right-0 bg-gray-800 shadow-md rounded px-4 py-2 hidden group-hover:block z-50">
                   <Link
                     to="/channelDashboard"
