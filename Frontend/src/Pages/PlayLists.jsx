@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 
-const PlayList= () => {
+const PlayLists= () => {
   const { videoId } = useParams();
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
@@ -299,4 +299,4 @@ const PlayList= () => {
   );
 };
 
-export default PlayList;
+export default PlayLists;
