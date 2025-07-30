@@ -16,7 +16,7 @@ import EditVideo from './Pages/EditVideo.jsx'
 import VideoPage from './Pages/VideoPage.jsx'
 import LikedVideos from './Pages/LikedVideos.jsx'
 import History from './Pages/History.jsx'
-import Playlist from './Pages/PlayList.jsx'
+import PlayList from './Pages/PlayList.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -33,7 +33,7 @@ const router = createBrowserRouter(
       <Route path='/video/:videoId'element={<VideoPage />} />
       <Route path='/likedVideos'element={<LikedVideos />} />
       <Route path='/history'element={<History />} />
-      <Route path='/playlist'element={<Playlist />} />
+      <Route path='/playlist'element={<PlayList />} />
     </Route>
   )
 )
