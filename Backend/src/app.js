@@ -4,18 +4,26 @@ import cookieParser from "cookie-parser";
 
 const app = express();
 
-const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map(origin => origin.trim().replace(/\/$/, ""));
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map(origin =>
+  origin.trim().replace(/\/$/, "")
+);
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed  by CORS"));
-    }
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // ✅ Allow server-to-server or curl/no-origin requests
+      if (!origin) return callback(null, true);
+
+      // ✅ Allow only whitelisted origins
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS: " + origin));
+      }
+    },
+    credentials: true,
+  })
+);
 
 
 app.use(express.json({limit: "20kb"}))
