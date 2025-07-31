@@ -20,7 +20,7 @@ const EditDetails = () => {
 
   const updateDetails = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/users/update-account", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/users/update-account", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -44,7 +44,7 @@ const EditDetails = () => {
 
   const changePassword = async () => {
     try {
-      const res = await fetch("http://localhost:8000/api/v1/users/change-password", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/users/change-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ const EditDetails = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/users/${endpoint}`, {
+      const res = await fetch(`https://video-app-1l96.onrender.com/api/v1/users/${endpoint}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

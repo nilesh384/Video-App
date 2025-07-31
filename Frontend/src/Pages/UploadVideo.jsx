@@ -44,7 +44,7 @@ const UploadVideo = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/videos/publish-video",
+        "https://video-app-1l96.onrender.com/api/v1/videos/publish-video",
         {
           method: "POST",
           body: data,

@@ -38,7 +38,7 @@ const Landing = () => {
   const fetchVideos = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/videos/get-all-videos"
+        "https://video-app-1l96.onrender.com/api/v1/videos/get-all-videos"
       );
       const data = await response.json();
       setVideos(data.data.videos);

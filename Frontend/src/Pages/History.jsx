@@ -32,7 +32,7 @@ const History = () => {
     setLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8000/api/v1/users/history", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/users/history", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ const History = () => {
     const token = localStorage.getItem("token");
     setClearing(true);
     try {
-      const res = await fetch("http://localhost:8000/api/v1/users/history", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/users/history", {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

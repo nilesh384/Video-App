@@ -34,7 +34,7 @@ const LikedVideos = () => {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/like/video", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/like/video", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

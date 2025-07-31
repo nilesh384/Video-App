@@ -16,7 +16,7 @@ const EditVideo = () => {
     const fetchVideo = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:8000/api/v1/videos/${videoId}`, {
+        const res = await fetch(`https://video-app-1l96.onrender.com/api/v1/videos/${videoId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const result = await res.json();
@@ -40,7 +40,7 @@ const EditVideo = () => {
     setIsUpdating(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8000/api/v1/videos/${videoId}`, {
+      const res = await fetch(`https://video-app-1l96.onrender.com/api/v1/videos/${videoId}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ const EditVideo = () => {
     try {
       setIsUpdating(true);
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:8000/api/v1/videos/update-thumbnail/${videoId}`, {
+      const res = await fetch(`https://video-app-1l96.onrender.com/api/v1/videos/update-thumbnail/${videoId}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

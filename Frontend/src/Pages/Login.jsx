@@ -52,7 +52,7 @@ const Login = () => {
       : { username: formData.identifier, password: formData.password };
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/users/login", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/users/login", {
         method: "POST",
         credentials: "include", // ✅ absolutely required
         body: JSON.stringify(loginPayload),

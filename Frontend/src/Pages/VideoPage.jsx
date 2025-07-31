@@ -56,7 +56,7 @@ const VideoPage = () => {
   };
 
   const fetchVideo = async () => {
-    const res = await fetch(`http://localhost:8000/api/v1/videos/${videoId}`, {
+    const res = await fetch(`https://video-app-1l96.onrender.com/api/v1/videos/${videoId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const { data } = await res.json();
@@ -64,14 +64,14 @@ const VideoPage = () => {
   };
 
   const incrementView = async () => {
-    await fetch(`http://localhost:8000/api/v1/videos/${videoId}/view`, {
+    await fetch(`https://video-app-1l96.onrender.com/api/v1/videos/${videoId}/view`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });
   };
 
   const updateWatchHistory = async () => {
-    await fetch("http://localhost:8000/api/v1/users/history", {
+    await fetch("https://video-app-1l96.onrender.com/api/v1/users/history", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -84,7 +84,7 @@ const VideoPage = () => {
   const fetchComments = async (pageNumber = 1, order = sortOrder) => {
     setLoadingComments(true);
     const res = await fetch(
-      `http://localhost:8000/api/v1/comment/video/${videoId}?page=${pageNumber}&sortOrder=${order}`,
+      `https://video-app-1l96.onrender.com/api/v1/comment/video/${videoId}?page=${pageNumber}&sortOrder=${order}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const { data } = await res.json();
@@ -103,7 +103,7 @@ const VideoPage = () => {
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     const res = await fetch(
-      `http://localhost:8000/api/v1/comment/add-comment/${videoId}`,
+      `https://video-app-1l96.onrender.com/api/v1/comment/add-comment/${videoId}`,
       {
         method: "POST",
         headers: {
@@ -123,7 +123,7 @@ const VideoPage = () => {
 
   const handleEditComment = async (commentId) => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/comment/update-comment/${commentId}`,
+      `https://video-app-1l96.onrender.com/api/v1/comment/update-comment/${commentId}`,
       {
         method: "PATCH",
         headers: {
@@ -142,7 +142,7 @@ const VideoPage = () => {
 
   const handleDeleteComment = async (commentId) => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/comment/delete-comment/${commentId}`,
+      `https://video-app-1l96.onrender.com/api/v1/comment/delete-comment/${commentId}`,
       {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
@@ -155,7 +155,7 @@ const VideoPage = () => {
 
   const handleLike = async () => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/like/video/${videoId}`,
+      `https://video-app-1l96.onrender.com/api/v1/like/video/${videoId}`,
       {
         method: "POST",
         headers: {
@@ -178,7 +178,7 @@ const VideoPage = () => {
 
   const handleSubscribe = async () => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/subscription/toggle/${videoData.owner._id}`,
+      `https://video-app-1l96.onrender.com/api/v1/subscription/toggle/${videoData.owner._id}`,
       {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` },
@@ -198,7 +198,7 @@ const VideoPage = () => {
 
   const fetchUserPlaylists = async () => {
     const res = await fetch(
-      "http://localhost:8000/api/v1/playlist/get-user-playlists",
+      "https://video-app-1l96.onrender.com/api/v1/playlist/get-user-playlists",
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -209,7 +209,7 @@ const VideoPage = () => {
 
   const handleAddToPlaylist = async (playlistId) => {
     const res = await fetch(
-      `http://localhost:8000/api/v1/playlist/add-video-to-playlist/${playlistId}/${videoId}`,
+      `https://video-app-1l96.onrender.com/api/v1/playlist/add-video-to-playlist/${playlistId}/${videoId}`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -231,7 +231,7 @@ const VideoPage = () => {
     setCreatingPlaylistModal(true);
 
     const res = await fetch(
-      "http://localhost:8000/api/v1/playlist/create-playlist",
+      "https://video-app-1l96.onrender.com/api/v1/playlist/create-playlist",
       {
         method: "POST",
         headers: {

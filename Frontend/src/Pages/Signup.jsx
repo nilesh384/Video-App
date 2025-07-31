@@ -57,7 +57,7 @@ const Signup = () => {
     });
 
     try {
-      const res = await fetch("http://localhost:8000/api/v1/users/register", {
+      const res = await fetch("https://video-app-1l96.onrender.com/api/v1/users/register", {
         method: "POST",
         body: form,
       });

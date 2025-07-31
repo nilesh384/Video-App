@@ -16,7 +16,7 @@ const YourVideos = () => {
       const userId = localStorage.getItem("userId");
 
       const response = await fetch(
-        `http://localhost:8000/api/v1/videos/get-all-videos?userId=${userId}`,
+        `https://video-app-1l96.onrender.com/api/v1/videos/get-all-videos?userId=${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -53,7 +53,7 @@ const YourVideos = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:8000/api/v1/videos/${videoToDelete}`,
+        `https://video-app-1l96.onrender.com/api/v1/videos/${videoToDelete}`,
         {
           method: "DELETE",
           headers: {

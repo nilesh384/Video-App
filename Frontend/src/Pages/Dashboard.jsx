@@ -35,7 +35,7 @@ const ChannelDashboard = () => {
       // Logged-in user fetch
       try {
         const res = await fetch(
-          "http://localhost:8000/api/v1/dashboard/channel-stats",
+          "https://video-app-1l96.onrender.com/api/v1/dashboard/channel-stats",
           {
             headers: {
               "Content-Type": "application/json",

@@ -23,7 +23,7 @@ const PlayLists= () => {
   const fetchPlaylists = async () => {
     try {
       const res = await fetch(
-        "http://localhost:8000/api/v1/playlist/get-user-playlists",
+        "https://video-app-1l96.onrender.com/api/v1/playlist/get-user-playlists",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -41,7 +41,7 @@ const PlayLists= () => {
     if (!newPlaylistName.trim()) return;
 
     const res = await fetch(
-      "http://localhost:8000/api/v1/playlist/create-playlist",
+      "https://video-app-1l96.onrender.com/api/v1/playlist/create-playlist",
       {
         method: "POST",
         headers: {
@@ -75,7 +75,7 @@ const PlayLists= () => {
   const confirmDelete = async () => {
     if (deleteConfirmModal.type === "playlist") {
       const res = await fetch(
-        `http://localhost:8000/api/v1/playlist/delete-playlist/${deleteConfirmModal.id}`,
+        `https://video-app-1l96.onrender.com/api/v1/playlist/delete-playlist/${deleteConfirmModal.id}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
@@ -92,7 +92,7 @@ const PlayLists= () => {
       const playlistId = selectedPlaylistId;
       const videoId = deleteConfirmModal.id;
       await fetch(
-        `http://localhost:8000/api/v1/playlist/delete-video-from-playlist/${playlistId}/${videoId}`,
+        `https://video-app-1l96.onrender.com/api/v1/playlist/delete-video-from-playlist/${playlistId}/${videoId}`,
         {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },

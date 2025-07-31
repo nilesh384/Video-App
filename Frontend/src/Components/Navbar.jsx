@@ -12,7 +12,7 @@ const Navbar = () => {
       try {
         const token = localStorage.getItem("token");
         const response = await fetch(
-          "http://localhost:8000/api/v1/users/current-user",
+          "https://video-app-1l96.onrender.com/api/v1/users/current-user",
           {
             headers: {
               "Content-Type": "application/json",
@@ -38,7 +38,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/v1/users/logout",
+        "https://video-app-1l96.onrender.com/api/v1/users/logout",
         {
           method: "POST",
           headers: {
