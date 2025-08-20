@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 
 const PlayLists= () => {
   const { videoId } = useParams();
@@ -19,6 +19,7 @@ const PlayLists= () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem("token");
 
   const fetchPlaylists = async () => {
@@ -38,7 +39,15 @@ const PlayLists= () => {
         }
       );
       const { data } = await res.json();
-      if (res.ok) setPlaylists(data);
+      if (res.ok) {
+        setPlaylists(data || []);
+        // after fetching, if query param asks to select watch-later, pick the server provided one
+        const params = new URLSearchParams(location.search);
+        if (params.get("select") === "watch-later") {
+          const wl = (data || []).find((p) => p.isPermanent || p.name === "Watch later");
+          if (wl) setSelectedPlaylistId(wl._id);
+        }
+      }
     } catch (error) {
       console.error("Error fetching playlists:", error);
     } finally {
@@ -121,6 +130,15 @@ const PlayLists= () => {
   useEffect(() => {
   fetchPlaylists();
   }, []);
+
+  // Keep selection in sync with URL query param (so clicking Sidebar -> Watch Later selects it)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("select") === "watch-later") {
+      const wl = playlists.find((p) => p.isPermanent || p.name === "Watch later");
+      if (wl) setSelectedPlaylistId(wl._id);
+    }
+  }, [location.search, playlists]);
 
   const selectedPlaylist = playlists.find((p) => p._id === selectedPlaylistId);
 
@@ -220,8 +238,8 @@ const PlayLists= () => {
         </div>
 
       {resolvedSelectedPlaylist && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">📺 {resolvedSelectedPlaylist.name} - Videos</h2>
+        <div className="mb-32">
+          <h2 className="text-2xl font-semibold mb-4">📺 {resolvedSelectedPlaylist.name} Videos</h2>
           {resolvedSelectedPlaylist.videos.length === 0 ? (
             <p>No videos in this playlist.</p>
           ) : (
@@ -238,7 +256,7 @@ const PlayLists= () => {
                       <p className="text-sm text-gray-400">{video.owner?.username || "Unknown"}</p>
                     </div>
                   </div>
-                  {!(resolvedSelectedPlaylist.isPermanent || resolvedSelectedPlaylist.name === "Watch later") && (
+                  {loggedIn && (
                     <div className="group absolute w-fit bottom-9 right-4">
                       <FaTrash className="text-xl text-red-500 cursor-pointer opacity-80 hover:opacity-100 hover:scale-110 transition-transform duration-200" onClick={() => setDeleteConfirmModal({ show: true, type: "video", id: video._id })} />
                       <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">Delete video</span>

@@ -5,7 +5,8 @@ import { Link, useLocation } from "react-router-dom";
 
 function Sidebar() {
 
-    const location = useLocation();
+  const location = useLocation();
+  const searchSelect = new URLSearchParams(location.search).get('select');
 
   return (
     <div>
@@ -20,8 +21,8 @@ function Sidebar() {
           <NavItem icon={<FaUpload />} label="Upload Video" to="/uploadvideo" active={location.pathname === "/uploadvideo"} />
           <NavItem icon={<FaFire />} label="Trending" active={location.pathname === "/trending"} />
           <NavItem icon={<FaThumbsUp />} label="Liked Videos" to="/likedVideos" active={location.pathname === "/liked"} />
-          <NavItem icon={<FaList />} label="Playlists" to="/playlist" active={location.pathname === "/playlist"} />
-          <NavItem icon={<FaClock />} label="Watch Later" active={location.pathname === "/watch-later"} />
+          <NavItem icon={<FaList />} label="Playlists" to="/playlist" active={location.pathname === "/playlist" && searchSelect !== 'watch-later'} />
+          <NavItem icon={<FaClock />} label="Watch Later" to="/playlist?select=watch-later" active={location.pathname === "/playlist" && searchSelect === 'watch-later'} />
 
         </nav>
       </aside>
