@@ -83,6 +83,7 @@ const PlayLists= () => {
 
   const confirmDelete = async () => {
     if (deleteConfirmModal.type === "playlist") {
+  // deletion of permanent playlists will be prevented by the backend (403)
       const res = await fetch(
         `https://video-app-1l96.onrender.com/api/v1/playlist/delete-playlist/${deleteConfirmModal.id}`,
         {
@@ -98,8 +99,13 @@ const PlayLists= () => {
           setSelectedPlaylistId(null);
       }
     } else if (deleteConfirmModal.type === "video") {
-      const playlistId = selectedPlaylistId;
+      const playlistId = selectedPlaylistId || (displayPlaylists.length > 0 ? displayPlaylists[0]._id : null);
       const videoId = deleteConfirmModal.id;
+      if (!playlistId) {
+        console.error("No playlist selected to delete video from");
+        setDeleteConfirmModal({ show: false, type: "", id: "" });
+        return;
+      }
       await fetch(
         `https://video-app-1l96.onrender.com/api/v1/playlist/delete-video-from-playlist/${playlistId}/${videoId}`,
         {
@@ -117,6 +123,19 @@ const PlayLists= () => {
   }, []);
 
   const selectedPlaylist = playlists.find((p) => p._id === selectedPlaylistId);
+
+  // Build a display list where server-provided Watch later (or any isPermanent playlist) appears first
+  const displayPlaylists = [...playlists].sort((a, b) => {
+    const aIsWL = Boolean(a?.isPermanent) || a?.name === "Watch later";
+    const bIsWL = Boolean(b?.isPermanent) || b?.name === "Watch later";
+    if (aIsWL && !bIsWL) return -1;
+    if (!aIsWL && bIsWL) return 1;
+    return 0;
+  });
+
+  // Default-resolve selection: if nothing selected, prefer server-provided Watch later first
+  const resolvedSelectedPlaylist =
+    selectedPlaylist || (displayPlaylists.length > 0 ? displayPlaylists[0] : null);
 
   return (
     <div className="flex min-h-screen bg-[#0f172a] text-white">
@@ -151,114 +170,80 @@ const PlayLists= () => {
               <p className="text-gray-400 max-w-xl mb-6">Playlists let you organize videos into collections — sign in to create playlists, save videos, and keep everything synced across devices.</p>
               
             </div>
-          ) : playlists.length === 0 ? (
+          ) : playlists.length === 0 && displayPlaylists.length <= 1 ? (
             <p>No playlists found.</p>
           ) : (
             <div className="grid md:grid-cols-3 gap-4 mb-10">
-          {playlists.map((playlist) => (
-            <div
-              key={playlist._id}
-              className={`bg-gray-800 rounded-lg p-4 hover:bg-gray-700 cursor-pointer transition relative ${
-                selectedPlaylistId === playlist._id
-                  ? "border border-purple-500"
-                  : ""
-              }`}
-              onClick={() =>
-                setSelectedPlaylistId(
-                  selectedPlaylistId === playlist._id ? null : playlist._id
-                )
-              }
-            >
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">{playlist.name}</h2>
-                <div className="group relative w-fit">
-                  <FaTrash
-                    className="text-xl opacity-80 hover:text-red-500 hover:scale-125 transition cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDeleteConfirmModal({
-                        show: true,
-                        type: "playlist",
-                        id: playlist._id,
-                      });
-                    }}
-                  />
-                  <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
-                    Delete playlist
-                  </span>
+              {displayPlaylists.map((playlist) => (
+                <div
+                  key={playlist._id}
+                  className={`bg-gray-800 rounded-lg p-4 hover:bg-gray-700 cursor-pointer transition relative ${
+                    selectedPlaylistId === playlist._id ? "border border-purple-500" : ""
+                  }`}
+                  onClick={() =>
+                    setSelectedPlaylistId(
+                      selectedPlaylistId === playlist._id ? null : playlist._id
+                    )
+                  }
+                >
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold">{playlist.name}</h2>
+                    <div className="group relative w-fit">
+                      {!(playlist.isPermanent || playlist.name === "Watch later") && (
+                        <>
+                          <FaTrash
+                            className="text-xl opacity-80 hover:text-red-500 hover:scale-125 transition cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteConfirmModal({
+                                show: true,
+                                type: "playlist",
+                                id: playlist._id,
+                              });
+                            }}
+                          />
+                          <span className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
+                            Delete playlist
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400 mt-1">{playlist.description || "No description"}</p>
+                  <p className="text-sm text-gray-300 mt-2">🎥 {playlist.videos.length} video{playlist.videos.length !== 1 && "s"}</p>
                 </div>
-              </div>
-              <p className="text-sm text-gray-400 mt-1">
-                {playlist.description || "No description"}
-              </p>
-              <p className="text-sm text-gray-300 mt-2">
-                🎥 {playlist.videos.length} video
-                {playlist.videos.length !== 1 && "s"}
-              </p>
+              ))}
             </div>
-          ))}
-        </div>
         
       )}
 
         </div>
 
-      {selectedPlaylist && (
+      {resolvedSelectedPlaylist && (
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            📺 {selectedPlaylist.name} - Videos
-          </h2>
-          {selectedPlaylist.videos.length === 0 ? (
+          <h2 className="text-2xl font-semibold mb-4">📺 {resolvedSelectedPlaylist.name} - Videos</h2>
+          {resolvedSelectedPlaylist.videos.length === 0 ? (
             <p>No videos in this playlist.</p>
           ) : (
             <div className="grid md:grid-cols-3 gap-6">
-              {selectedPlaylist.videos.map((video) => (
-                <div
-                  key={video._id}
-                  className="bg-gray-800 rounded-lg p-4 relative group hover:cursor-pointer hover:scale-105 transition duration-200"
-                >
-                  <div
-                    onClick={() => navigate(`/video/${video._id}`)}
-                    className="cursor-pointer"
-                  >
+              {resolvedSelectedPlaylist.videos.map((video) => (
+                <div key={video._id} className="bg-gray-800 rounded-lg p-4 relative group hover:cursor-pointer hover:scale-105 transition duration-200">
+                  <div onClick={() => navigate(`/video/${video._id}`)} className="cursor-pointer">
                     <div className="w-full h-48 bg-black mb-2 rounded-lg overflow-hidden">
-                      <img
-                        src={video.thumbnail || "/default-thumbnail.jpg"}
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) =>
-                          (e.target.src = "/default-thumbnail.jpg")
-                        }
-                      />
+                      <img src={video.thumbnail || "/default-thumbnail.jpg"} alt={video.title} className="w-full h-full object-cover" onError={(e) => (e.target.src = "/default-thumbnail.jpg")} />
                     </div>
                     <h3 className="text-lg font-semibold">{video.title}</h3>
                     <div className="flex space-x-2">
-                      <img
-                        src={video.owner?.avatar}
-                        alt={video.owner?.username}
-                        className="w-6 h-6 rounded-full"
-                      />
-                      <p className="text-sm text-gray-400">
-                        {video.owner?.username || "Unknown"}
-                      </p>
+                      <img src={video.owner?.avatar} alt={video.owner?.username} className="w-6 h-6 rounded-full" />
+                      <p className="text-sm text-gray-400">{video.owner?.username || "Unknown"}</p>
                     </div>
                   </div>
-                  <div className="group absolute w-fit bottom-9 right-4">
-                    <FaTrash
-                      className="text-xl text-red-500 cursor-pointer opacity-80 hover:opacity-100 hover:scale-110 transition-transform duration-200"
-                      onClick={() =>
-                        setDeleteConfirmModal({
-                          show: true,
-                          type: "video",
-                          id: video._id,
-                        })
-                      }
-                    />
-
-                    <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">
-                      Delete video
-                    </span>
-                  </div>
+                  {!(resolvedSelectedPlaylist.isPermanent || resolvedSelectedPlaylist.name === "Watch later") && (
+                    <div className="group absolute w-fit bottom-9 right-4">
+                      <FaTrash className="text-xl text-red-500 cursor-pointer opacity-80 hover:opacity-100 hover:scale-110 transition-transform duration-200" onClick={() => setDeleteConfirmModal({ show: true, type: "video", id: video._id })} />
+                      <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap z-50 pointer-events-none">Delete video</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

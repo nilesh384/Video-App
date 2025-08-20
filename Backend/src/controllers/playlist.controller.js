@@ -30,21 +30,28 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     throw new apiError(400, "Valid userId is required");
   }
 
-  const playlists = await Playlist.find({ owner: userId }).populate({
-    path: "videos",
-    populate: {
-      path: "owner",
-      select: "username avatar", // only return these fields
-    },
-  });
+    // Ensure a permanent "Watch later" playlist exists for the user.
+    let playlists = await Playlist.find({ owner: userId }).populate({
+        path: "videos",
+        populate: { path: "owner", select: "username avatar" },
+    });
 
-  if (!playlists || playlists.length === 0) {
-    throw new apiError(404, "No playlists found for this user");
-  }
+    // If watch-later doesn't exist, create it (marked isPermanent)
+    const hasWatchLater = playlists.some((p) => p.name === "Watch later");
+    if (!hasWatchLater) {
+        const wl = await Playlist.create({
+            name: "Watch later",
+            description: "Videos saved to watch later",
+            owner: userId,
+            isPermanent: true,
+        });
+        playlists = [wl, ...playlists];
+    } else {
+        // make sure watch-later appears first in returned list
+        playlists = playlists.sort((a, b) => (a.name === "Watch later" ? -1 : 1));
+    }
 
-  return res
-    .status(200)
-    .json(new apiResponse(200, playlists, "User's playlists fetched successfully"));
+    return res.status(200).json(new apiResponse(200, playlists, "User's playlists fetched successfully"));
 });
 
 
@@ -138,6 +145,11 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     // Check ownership
     if (playlist.owner.toString() !== req.user._id.toString()) {
         throw new apiError(403, "You are not authorized to delete this playlist");
+    }
+
+    // Prevent deleting permanent playlists (e.g., Watch later)
+    if (playlist.isPermanent) {
+        throw new apiError(403, "This playlist cannot be deleted");
     }
 
     await Playlist.findByIdAndDelete(playlistId);
