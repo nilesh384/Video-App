@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiLogOut, FiBell } from "react-icons/fi";
+import logo from "../Assets/images/logo.png";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -74,8 +75,17 @@ const Navbar = () => {
   return (
     <header className="w-full sticky top-0 z-50 bg-gradient-to-r from-[#080716] via-[#120f37] to-[#11111d] text-white shadow-md">
       <nav className="flex justify-between items-center px-6 py-4 md:px-10">
-        <Link to="/" className="text-2xl font-bold">
-          My Tube
+        <Link to="/" className="flex items-center text-2xl font-bold gap-3">
+          <img
+            src={logo}
+            alt="My Tube logo"
+            className="w-12 h-12 object-cover rounded-full"
+            onError={(e) => {
+              // fallback: hide broken image
+              e.currentTarget.style.display = "none";
+            }}
+          />
+          <span>My Tube</span>
         </Link>
 
         <div className="hidden md:flex space-x-8 text-lg font-medium">

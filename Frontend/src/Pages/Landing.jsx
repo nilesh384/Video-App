@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 const Landing = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [noResults, setNoResults] = useState(false);
 
   const timeAgo = (date) => {
     const now = new Date();
@@ -35,13 +37,21 @@ const Landing = () => {
     return `${diffYears} year${diffYears !== 1 ? "s" : ""} ago`;
   };
 
-  const fetchVideos = async () => {
+  const fetchVideos = async (q = "") => {
+    setLoading(true);
     try {
-      const response = await fetch(
+      const url = new URL(
         "https://video-app-1l96.onrender.com/api/v1/videos/get-all-videos"
       );
+      // default params: fetch more results when searching
+      url.searchParams.set("limit", "50");
+      if (q) url.searchParams.set("query", q);
+
+      const response = await fetch(url.toString());
       const data = await response.json();
-      setVideos(data.data.videos);
+      const fetched = data?.data?.videos || [];
+      setVideos(fetched);
+      setNoResults(fetched.length === 0);
     } catch (error) {
       console.error("Error fetching videos:", error);
     } finally {
@@ -50,8 +60,26 @@ const Landing = () => {
   };
 
   useEffect(() => {
+    // initial load
     fetchVideos();
   }, []);
+
+  // debounce search to avoid too many requests
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // if search box is empty, fetch all
+      fetchVideos(query.trim());
+    }, 350);
+
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  const onSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      // immediate search on Enter
+      fetchVideos(query.trim());
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#0f172a] text-white">
@@ -60,6 +88,9 @@ const Landing = () => {
           <h2 className="text-xl font-bold md:hidden">PortfolioTube</h2>
           <div className="relative w-full max-w-md mx-auto">
             <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={onSearchKeyDown}
               className="w-full py-2 px-4 rounded-full bg-[#334155] text-white focus:outline-none"
               placeholder="Search videos..."
             />
@@ -70,12 +101,13 @@ const Landing = () => {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <p className="text-center p-4">Loading videos...</p>
+          ) : noResults ? (
+            <p className="text-center p-4">No videos found for "{query}"</p>
           ) : (
             <section className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-y-auto hover:cursor-pointer">
-              {videos.map((video, idx) => (
-                <Link to={`/video/${video._id}`}>
+              {videos.map((video) => (
+                <Link key={video._id} to={`/video/${video._id}`}>
                   <div
-                    key={idx}
                     className="bg-[#1e293b] rounded-xl overflow-hidden shadow-md hover:scale-105 transition-transform"
                   >
                     <div

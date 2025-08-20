@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaUpload } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const UploadVideo = () => {
   const navigate = useNavigate();
@@ -83,7 +83,32 @@ const UploadVideo = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white px-6 py-10 relative">
+    <div className="min-h-screen bg-[#0f172a] text-white px-6 pt-0 pb-10 relative">
+      <header className="flex items-center justify-between bg-[#1e293b] px-4 py-3 shadow-md mb-6">
+        <h2 className="text-xl font-bold">Upload Video</h2>
+
+        {loggedIn ? (
+          <Link to="/yourvideos" className="bg-gray-700 text-white px-4 py-2 rounded-md">Your Videos</Link>
+        ) : (
+          <div className="flex items-center space-x-3">
+            <p className="text-gray-300 mr-3 hidden sm:block">Sign in to upload videos</p>
+            <Link to="/login" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md">Sign in</Link>
+          </div>
+        )}
+      </header>
+
+      {!loggedIn ? (
+        <div className="max-w-3xl mx-auto flex flex-col items-center justify-center py-20 text-center">
+          <svg width="140" height="140" viewBox="0 0 24 24" fill="none" className="mb-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <path d="M20 16.58A5 5 0 0 0 17 7h-1.26A6 6 0 1 0 4 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  <path d="M12 12v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+  <path d="M9 15l3-3 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+</svg>
+          <h3 className="text-xl font-semibold mb-2">Sign in to upload videos</h3>
+          <p className="text-gray-400 max-w-xl">You must be signed in to upload videos. Signing in lets you publish, edit, and manage your uploads from your channel dashboard.</p>
+          
+        </div>
+      ) : (
       <div className="max-w-3xl mx-auto bg-[#1e293b] p-8 rounded-xl shadow-md">
         <h2 className="text-2xl font-bold mb-6">Upload New Video</h2>
 
@@ -176,6 +201,7 @@ const UploadVideo = () => {
           <p className="mt-4 text-green-400 font-medium">{uploadMessage}</p>
         )}
       </div>
+      )}
 
       {/* Login Modal */}
       {showLoginModal && (

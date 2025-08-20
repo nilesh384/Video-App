@@ -14,17 +14,17 @@ const ChannelDashboard = () => {
       // Guest dashboard fallback
       if (!token) {
         setChannel({
-          avatar: "https://via.placeholder.com/120",
-          coverPhoto: "https://via.placeholder.com/800x200",
-          name: "Welcome to DevTube!",
+          avatar: "https://via.placeholder.com/150?text=Avatar",
+          coverPhoto: "https://via.placeholder.com/1200x300?text=Cover+Photo",
+          name: "Welcome to My Tube",
           username: "@guest",
-          bio: "Sign in to customize your channel and access personalized content.",
+          bio: "You are browsing as a guest. Sign in to personalize your channel, upload videos, and track your stats.",
           stats: {
             videos: 0,
             subscribers: 0,
             views: 0,
             likes: 0,
-            joined: "Join to start tracking stats",
+            joined: "Not a member",
           },
         });
         setUser(null);
@@ -50,41 +50,45 @@ const ChannelDashboard = () => {
         const stats = result.data;
         setUser(stats);
 
+        // Safely compute joined date
+        const rawJoined = stats.createdAt || localStorage.getItem("createdAt");
+        const joined = rawJoined
+          ? new Date(rawJoined).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "Unknown";
+
         setChannel({
-          avatar: stats.avatar || localStorage.getItem("avatar"),
-          coverPhoto: stats.coverphoto || localStorage.getItem("coverphoto"),
-          name: stats.fullname || localStorage.getItem("fullname"),
-          username: "@" + (stats.username || localStorage.getItem("username")),
-          bio: "Full Stack Developer | Open Source Contributor | Building with AI 🚀",
+          avatar: stats.avatar || localStorage.getItem("avatar") || "https://via.placeholder.com/150?text=Avatar",
+          coverPhoto: stats.coverphoto || localStorage.getItem("coverphoto") || "https://via.placeholder.com/1200x300?text=Cover+Photo",
+          name: stats.fullname || localStorage.getItem("fullname") || "My Channel",
+          username: "@" + (stats.username || localStorage.getItem("username") || "user"),
+          bio: stats.bio || "Creator on My Tube",
           stats: {
             videos: stats.totalVideos || 0,
             subscribers: stats.totalSubscribers || 0,
             views: stats.totalViews || 0,
             likes: stats.totalLikes || 0,
-            joined: new Date(
-              stats.createdAt || localStorage.getItem("createdAt")
-            ).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
+            joined,
           },
         });
       } catch (error) {
         console.error("Fetch error:", error);
         // Fallback to guest
         setChannel({
-          avatar: "https://via.placeholder.com/120",
-          coverPhoto: "https://via.placeholder.com/800x200",
-          name: "Welcome to DevTube!",
+          avatar: "https://via.placeholder.com/150?text=Avatar",
+          coverPhoto: "https://via.placeholder.com/1200x300?text=Cover+Photo",
+          name: "Welcome to My Tube",
           username: "@guest",
-          bio: "Sign in to customize your channel and access personalized content.",
+          bio: "You are browsing as a guest. Sign in to personalize your channel.",
           stats: {
             videos: 0,
             subscribers: 0,
             views: 0,
             likes: 0,
-            joined: "Join to start tracking stats",
+            joined: "Not a member",
           },
         });
         setUser(null);

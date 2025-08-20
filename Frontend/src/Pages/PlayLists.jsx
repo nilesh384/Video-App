@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 const PlayLists= () => {
   const { videoId } = useParams();
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(Boolean(localStorage.getItem("token")));
   const [creatingPlaylistModal, setCreatingPlaylistModal] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [newPlaylistDesc, setNewPlaylistDesc] = useState("");
@@ -21,6 +22,14 @@ const PlayLists= () => {
   const token = localStorage.getItem("token");
 
   const fetchPlaylists = async () => {
+    // if not logged in, skip calling protected endpoint
+    if (!token) {
+      setLoggedIn(false);
+      setPlaylists([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(
         "https://video-app-1l96.onrender.com/api/v1/playlist/get-user-playlists",
@@ -104,27 +113,48 @@ const PlayLists= () => {
   };
 
   useEffect(() => {
-    fetchPlaylists();
+  fetchPlaylists();
   }, []);
 
   const selectedPlaylist = playlists.find((p) => p._id === selectedPlaylistId);
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold mb-6">📃 Your Playlists</h1>
-        <FaPlus
-          className="text-2xl hover:cursor-pointer hover:text-purple-500 hover:scale-125 transition-all duration-200"
-          onClick={() => setCreatingPlaylistModal(true)}
-        />
-      </div>
+    <div className="flex min-h-screen bg-[#0f172a] text-white">
+      <main className="flex-1 flex flex-col">
+        <header className="flex items-center justify-between bg-[#1e293b] px-4 py-3 shadow-md">
+          <h2 className="text-xl font-bold">📃 Your Playlists</h2>
+          {loggedIn ? (
+            <FaPlus
+              className="text-2xl hover:cursor-pointer hover:text-purple-500 hover:scale-125 transition-all duration-200"
+              onClick={() => setCreatingPlaylistModal(true)}
+            />
+          ) : (
+            <div className="flex items-center space-x-3">
+              <p className="text-gray-300 mr-3 hidden sm:block">Sign in to create playlists</p>
+              <Link to="/login" className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md">Sign in</Link>
+            </div>
+          )}
+        </header>
 
-      {loading ? (
-        <p>Loading playlists...</p>
-      ) : playlists.length === 0 ? (
-        <p>No playlists found.</p>
-      ) : (
-        <div className="grid md:grid-cols-3 gap-4 mb-10">
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <p>Loading playlists...</p>
+          ) : !loggedIn ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center w-full px-4">
+              <svg width="160" height="160" viewBox="0 0 24 24" fill="none" className="mb-6 text-gray-400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="3" y="5" width="14" height="4" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/>
+                <rect x="3" y="11" width="12" height="4" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/>
+                <rect x="3" y="17" width="10" height="4" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/>
+                <circle cx="21" cy="9" r="2.3" stroke="currentColor" strokeWidth="1" fill="none"/>
+              </svg>
+              <h3 className="text-2xl font-semibold mb-2">Create playlists and save videos</h3>
+              <p className="text-gray-400 max-w-xl mb-6">Playlists let you organize videos into collections — sign in to create playlists, save videos, and keep everything synced across devices.</p>
+              
+            </div>
+          ) : playlists.length === 0 ? (
+            <p>No playlists found.</p>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-4 mb-10">
           {playlists.map((playlist) => (
             <div
               key={playlist._id}
@@ -168,7 +198,10 @@ const PlayLists= () => {
             </div>
           ))}
         </div>
+        
       )}
+
+        </div>
 
       {selectedPlaylist && (
         <div className="mt-8">
@@ -295,6 +328,7 @@ const PlayLists= () => {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 };
